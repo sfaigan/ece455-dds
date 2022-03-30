@@ -14,9 +14,9 @@ xSchedulerMessageRequest(MessageType_t RequestType)
     }
 }
 
-StatusMessage_t xCheckSchedulerMessage()
+SchedulerMessage_t xCheckSchedulerMessage()
 {
-    StatusMessage_t message;
+    SchedulerMessage_t message;
     if( xQueuePeek(xTaskMonitorQueueHandle, &message, (Tick_Type_t) 10) )
     {
         return message;

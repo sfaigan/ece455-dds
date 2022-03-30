@@ -4,13 +4,13 @@
 
 void vTaskMonitor( void *pvParameters )
 {
-    while(1)
+    while( 1 )
 	{
-        DeadlineDrivenTaskNode_t CompletedList, ActiveList, OverdueList;
-        StatusMessage_t incoming_message;
-        MessageType_t message_type;
-        /* Check for messages from scheduler */
-        incoming_message = xCheckSchedulerMessage();
+        DeadlineDrivenTaskNode_t *pxCompletedList, *pxActiveList, *pxOverdueList;
+        SchedulerMessage_t xIncomingMessage;
+        MessageType_t eMessageType;
+
+        xIncomingMessage = xCheckSchedulerMessage();
         if(incoming_message != 0)
 	    {
             message_type = incoming_message->MessageType;
