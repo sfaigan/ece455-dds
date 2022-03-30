@@ -78,21 +78,46 @@
 #include "../FreeRTOS_Source/include/semphr.h"
 #include "../FreeRTOS_Source/include/task.h"
 #include "../FreeRTOS_Source/include/timers.h"
+/* User includes */
+#include "deadline_driven_scheduler.h"
+#include "deadline_driven_task_generator.h"
 
-/*-----------------------------------------------------------*/
-/*
- * TODO: Implement this function for any hardware specific clock configuration
- * that was not already performed before main() was called.
- */
 static void prvSetupHardware( void );
 /*-----------------------------------------------------------*/
 
-int main(void)
+int main( void )
 {
 
 	/* Configure the system ready to run the demo.  The clock configuration
 	can be done here if it was not done before main() was called. */
 	prvSetupHardware();
+
+    /* Create queues */
+    xNewTasksQueueHandle = xQueueCreate( MAX_TASKS, sizeof( DDTask ) );
+    xTaskMessagesQueueHandle = xQueueCreate( MAX_CONCURRENT_TASKS, sizeof( TickType_t ) );
+    xTaskRegenerationRequestsQueueHandle = xQueueCreate( MAX_TASKS, sizeof( DDTask ) );
+    xTaskMonitorQueueHandle = xQueueCreate( MAX_MONITOR_REQUESTS, sizeof( StatusMessage_t ) );
+
+    /* Add queues to the registry, for the benefit of kernel aware debugging */
+    vQueueAddToRegistry( xNewTasksQueueHandle, "New Tasks" );
+    vQueueAddToRegistry( xTaskMessagesQueueHandle, "Task Messages" );
+    vQueueAddToRegistry( xTaskRegenerationRequestsQueueHandle, "Task Regeneration Requests" );
+
+    /* Create tasks */
+    xTaskCreate( vDeadlineDrivenScheduler, "Deadline Driven Scheduler", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
+    xTaskCreate( vDeadlineDrivenTaskGenerator, "Deadline Driven Task Generator", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
+    xTaskCreate( vDeadlineDrivenTaskMonitor, "Deadline Driven Task Monitor", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
+    xTaskCreate( vDeadlineDrivenTask, "Deadline Driven Task", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
+
+    xCurrentTaskCompleteEventGroup = xEventGroupCreate();
+    if ( xCurrentTaskCompleteEventGroup )
+    {
+        printf("Successfully created event group.");
+    }
+    else
+    {
+        printf("Failed to create event group.")
+    }
 
 	/* Start the tasks and timer running. */
 	vTaskStartScheduler();
