@@ -86,6 +86,34 @@
 static void prvSetupHardware( void );
 /*-----------------------------------------------------------*/
 
+void vTestTask500( void *pvParameters )
+{
+    printf("Test Task 500 starting!\n");
+
+    while( 1 )
+    {
+        if( xTaskGetTickCount() >= 500 )
+        {
+            printf("Test Task 500 completed!\n");
+            vCompleteDeadlineDrivenTask();
+        }
+    }
+}
+
+void vTestTask1000( void *pvParameters )
+{
+    printf("Test Task 1000 starting!\n");
+
+    while( 1 )
+    {
+        if( xTaskGetTickCount() >= 1000 )
+        {
+            printf("Test Task 1000 completed!\n");
+            vCompleteDeadlineDrivenTask();
+        }
+    }
+}
+
 int main( void )
 {
 
@@ -109,7 +137,7 @@ int main( void )
 
     /* Create tasks */
     xTaskCreate( vDeadlineDrivenScheduler, "Deadline Driven Scheduler", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
-    xTaskCreate( vDeadlineDrivenTaskGenerator, "Deadline Driven Task Generator", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
+//    xTaskCreate( vDeadlineDrivenTaskGenerator, "Deadline Driven Task Generator", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
 //    xTaskCreate( vDeadlineDrivenTaskMonitor, "Deadline Driven Task Monitor", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
 //    xTaskCreate( vDeadlineDrivenTask, "Deadline Driven Task", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
 
@@ -117,11 +145,14 @@ int main( void )
     if( xCurrentTaskCompleteEventGroup )
     {
         printf("Successfully created event group.");
+        xEventGroupSetBits( xCurrentTaskCompleteEventGroup, CURRENT_TASK_COMPLETE_BIT );
     }
     else
     {
         printf("Failed to create event group.");
     }
+
+    ulCreateDeadlineDrivenTask( vTestTask500 , "Test Task 500", 10000, 10000, 0 );
 
 	/* Start the tasks and timer running. */
 	vTaskStartScheduler();

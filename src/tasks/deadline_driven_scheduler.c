@@ -2,28 +2,84 @@
 
 #include "deadline_driven_scheduler.h"
 
-static DeadlineDrivenTaskNode_t *xAddTaskToList ( DeadlineDrivenTaskNode_t *pxTaskListHead,
-                                                          DeadlineDrivenTask_t xNewTask )
+static DeadlineDrivenTaskNode_t *pxCreateTaskNode( DeadlineDrivenTask_t xTask )
 {
-    if( !pxTaskListHead )
+    DeadlineDrivenTaskNode_t *pxTaskNode = pvPortMalloc( sizeof( DeadlineDrivenTaskNode_t ) );
+
+    if ( pxTaskNode == NULL )
     {
-        pxTaskListHead = pvPortMalloc( sizeof( DeadlineDrivenTaskNode_t ) );
-        pxTaskListHead->xTask = xNewTask;
-        pxTaskListHead->pxNext = NULL;
+        printf( "Failed to allocate a new task node." );
+        exit( EXIT_FAILURE );
+    }
+
+    pxTaskNode->xTask = xTask;
+    pxTaskNode->pxNext = NULL;
+
+    return pxTaskNode;
+}
+
+static void vAddTaskToList( DeadlineDrivenTaskNode_t **pxTaskListHead, DeadlineDrivenTask_t xNewTask )
+{
+    if( pxTaskListHead == NULL )
+    {
+        *pxTaskListHead = pxCreateTaskNode( xNewTask );
     }
     else
     {
-        DeadlineDrivenTaskNode_t *pxNewNode = pvPortMalloc( sizeof( DeadlineDrivenTaskNode_t ) );
-        pxNewNode->xTask = xNewTask;
-        pxNewNode->pxNext = NULL;
-        DeadlineDrivenTaskNode_t pxCurrentNode = pxTaskListHead;
-        while( pxCurrentNode->pxNext )
-        {
-            pxCurrentNode = pxTaskListHead->pxNext;
-        }
-        pxCurrentNode->pxNext = pxNewNode;
+        DeadlineDrivenTaskNode_t *pxNewNode = pxCreateTaskNode( xNewTask );
+        pxNewNode->pxNext = *pxTaskListHead;
+        *pxTaskListHead = pxNewNode;
     }
-    return pxTaskListHead;
+}
+
+static void vDeleteTaskFromList( DeadlineDrivenTaskNode_t **pxTaskListHead, uint32_t ulTaskId )
+{
+    DeadlineDrivenTaskNode_t *pxTempNode = *pxTaskListHead;
+    DeadlineDrivenTaskNode_t *pxPrevNode;
+    if( pxTempNode != NULL && pxTempNode->xTask.ulId == ulTaskId )
+    {
+        *pxTaskListHead = pxTempNode->pxNext;
+        vPortFree( pxTempNode );
+        return;
+    }
+
+    while( pxTempNode != NULL && pxTempNode->xTask.ulId != ulTaskId )
+    {
+        pxPrevNode = pxTempNode;
+        pxTempNode = pxTempNode->pxNext;
+    }
+
+    if( pxTempNode == NULL)
+    {
+        printf("Failed to delete task.");
+        return;
+    }
+
+    pxPrevNode->pxNext = pxTempNode->pxNext;
+    vPortFree( pxTempNode );
+}
+
+
+static void vPrintDeadlineDrivenTaskInfo( DeadlineDrivenTask_t xTask )
+{
+    // printf( "%s\n", xTask.cName );
+    printf( "**************************************************\n" );
+    printf( "ID: %lu\n", xTask.ulId );
+    printf( "Absolute Deadline: %lu\n", xTask.xAbsoluteDeadline );
+    printf( "Period: %lu\n", xTask.xPeriod );
+    printf( "Release Time: %lu\n", xTask.xReleaseTime );
+    printf( "Start Time: %lu\n", xTask.xStartTime );
+    printf( "Completion Time: %lu\n", xTask.xCompletionTime );
+}
+
+static void vPrintTaskList( DeadlineDrivenTaskNode_t *pxTaskListHead )
+{
+    DeadlineDrivenTaskNode_t *pxCurrentNode = pxTaskListHead;
+    while( pxCurrentNode != NULL )
+    {
+        vPrintDeadlineDrivenTaskInfo( pxCurrentNode->xTask );
+        pxCurrentNode = pxCurrentNode->pxNext;
+    }
 }
 
 uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
@@ -42,7 +98,6 @@ uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
     DeadlineDrivenTask_t xNewTask =
     {
         ulId: ulId,
-        cName: cName,
         xFTaskHandle: xFTaskHandle,
         xAbsoluteDeadline: xAbsoluteDeadline,
         xPeriod: xPeriod,
@@ -50,6 +105,7 @@ uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
         xStartTime: 0,
         xCompletionTime: 0
     };
+//    strcpy(xNewTask.cName, cName);
 
     if( xQueueSend( xNewTasksQueueHandle, &xNewTask, 1000 ) )
     {
@@ -62,10 +118,17 @@ uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
     return 0;
 }
 
-BaseType_t xDeleteDeadlineDrivenTask( uint32_t ulTaskId )
+void vDeleteDeadlineDrivenTask( uint32_t ulTaskId )
 {
     printf("Request to delete task: %lu\n", ulTaskId);
-    return 0;
+}
+
+void vCompleteDeadlineDrivenTask()
+{
+    printf("Task completed!\n");
+    TickType_t xCurrentTime = xTaskGetTickCount();
+    xQueueSend( xTaskMessagesQueueHandle, &xCurrentTime, 1000 );
+    xEventGroupSetBits( xCurrentTaskCompleteEventGroup, CURRENT_TASK_COMPLETE_BIT );
 }
 
 //static DDTaskNode* xReturnActiveDeadlineDrivenTasks();
@@ -77,46 +140,80 @@ void vDeadlineDrivenScheduler( void *pvParameters )
     DeadlineDrivenTaskNode_t *xActiveTasksHead = NULL;
     DeadlineDrivenTaskNode_t *xOverdueTasksHead = NULL;
     DeadlineDrivenTaskNode_t *xCompletedTasksHead = NULL;
+    DeadlineDrivenTaskNode_t *pxCursorNode = NULL;
+    DeadlineDrivenTaskNode_t *pxEarliestDeadlineTaskNode = NULL;
     DeadlineDrivenTask_t xNewTask;
+    TickType_t xEarliestDeadline = 0;
+    TickType_t xStartTime = 0;
+    TickType_t xCompletionTime = 0;
     
     while( 1 )
     {
         while( xQueueReceive( xNewTasksQueueHandle, &xNewTask, 1000 ) )
         {
-            if( xNewTask.xAbsoluteDeadline > xTaskGetTickCount() )
+            if( xNewTask.xAbsoluteDeadline <= xTaskGetTickCount() )
             {
-                xOverdueTasksHead = xAddTaskToList(&xOverdueTasksHead, xNewTask);
+                vAddTaskToList( &xOverdueTasksHead, xNewTask );
             }
             else
             {
-                xActiveTasksHead = xAddTaskToList(&xActiveTasksHead, xNewTask);
+                vAddTaskToList( &xActiveTasksHead, xNewTask );
             }
         }
-        /*
-            Receive from new task queue
-                For each task in new task queue
-                    If current time >= absolute deadline
-                        Copy task to overdue list
-                    Else
-                        Copy task to active list
 
-                Receive from task message queue
-                    If not empty
-                        Copy completed DDTask (in active tasks) to completed tasks
-                        Update completed DDTask's completion time from message
-                        Remove completed DDTask from active tasks
-                        Set priority of completed task's FTask to LOW
-                        Send copy of completed DDTask to task generation requests queue
+        if ( pxEarliestDeadlineTaskNode != NULL )
+        {
+            vTaskPrioritySet( pxEarliestDeadlineTaskNode->xTask.xFTaskHandle, PRIORITY_LOW );
+            pxEarliestDeadlineTaskNode->xTask.xCompletionTime = xCompletionTime;
+            xQueueSend( xTaskRegenerationRequestsQueueHandle, &pxEarliestDeadlineTaskNode->xTask, 1000 );
+
+            if( xQueueReceive( xTaskMessagesQueueHandle, &xCompletionTime, 1000 ) )
+            {
+                vAddTaskToList( &xCompletedTasksHead, pxEarliestDeadlineTaskNode->xTask );
+                vDeleteTaskFromList( &xActiveTasksHead, pxEarliestDeadlineTaskNode->xTask.ulId );
+            }
+            else if ( xEventGroupGetBits( xCurrentTaskCompleteEventGroup ) == 0 )
+            {
+                vAddTaskToList( &xOverdueTasksHead, pxEarliestDeadlineTaskNode->xTask );
+                vDeleteTaskFromList( &xActiveTasksHead, pxEarliestDeadlineTaskNode->xTask.ulId );
+            }
+        }
+
+        /*
+            Check monitor message queue (empty)
+                If not empty, perform requested action (switch/case)
                 
-                Check monitor message queue (empty)
-                    If not empty, perform requested action (switch/case)
-                
-                Find task with earliest deadline where current time > release time
-                Set start time of EDF Task's DDTask to current time (in ticks)
-                Set priority of EDF Task's FTask to HIGH
-                Unset CURRENT_TASK_COMPLETE event bit
-                Sleep until CURRENT_TASK_COMPLETE event bit is set or for a maximum of (absolute deadline - current time)
         */
+
+        if( xActiveTasksHead != NULL )
+        {
+            vPrintTaskList( xActiveTasksHead );
+            pxCursorNode = xActiveTasksHead;
+            xEarliestDeadline = pxCursorNode->xTask.xAbsoluteDeadline;
+            pxEarliestDeadlineTaskNode = pxCursorNode;
+            while( pxCursorNode->pxNext != NULL )
+            {
+                pxCursorNode = pxCursorNode->pxNext;
+
+                if( pxCursorNode->xTask.xReleaseTime >= xTaskGetTickCount() &&
+                    pxCursorNode->xTask.xAbsoluteDeadline < xEarliestDeadline )
+                {
+                    xEarliestDeadline = pxCursorNode->xTask.xAbsoluteDeadline;
+                    pxEarliestDeadlineTaskNode = pxCursorNode;
+                }
+            }
+
+            xStartTime = xTaskGetTickCount();
+            vTaskPrioritySet( pxEarliestDeadlineTaskNode->xTask.xFTaskHandle, PRIORITY_HIGH );
+            xEventGroupClearBits( xCurrentTaskCompleteEventGroup, CURRENT_TASK_COMPLETE_BIT );
+            pxEarliestDeadlineTaskNode->xTask.xStartTime = xStartTime;
+            xEventGroupWaitBits( xCurrentTaskCompleteEventGroup,
+                                 CURRENT_TASK_COMPLETE_BIT,
+                                 pdFALSE,
+                                 pdFALSE,
+                                 (xEarliestDeadline - xStartTime)
+                               );
+        }
         vTaskDelay(1000);
     }
 }
