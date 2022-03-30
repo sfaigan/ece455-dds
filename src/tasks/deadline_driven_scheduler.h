@@ -24,30 +24,9 @@
 #define CURRENT_TASK_COMPLETE_BIT ( 1 << 0 )
 
 /* Global variable declarations */
-xQueueHandle xNewTasksQueueHandle;
-xQueueHandle xTaskMessagesQueueHandle;
-xQueueHandle xTaskRegenerationRequestsQueueHandle;
-xQueueHandle xTaskMonitorQueueHandle;
-EventGroupHandle_t xCurrentTaskCompleteEventGroup;
 
 /* Type definitions */
-typedef struct DeadlineDrivenTask
-{
-    uint32_t     ulId;                        /* Unique identifier for the task */
-    //char         cName[MAX_TASK_NAME_LENGTH]; /* Text name for the task */
-    TaskHandle_t xFTaskHandle;                /* Handle of the corresponding FreeRTOS task */
-    TickType_t   xAbsoluteDeadline;           /* Time (in ticks) that the task must be completed by */
-    TickType_t   xPeriod;                     /* The task's period in ticks */
-    TickType_t   xReleaseTime;                /* Time (in ticks) when the task is released to the DDS */
-    TickType_t   xStartTime;                  /* Time (in ticks) when the task was started */
-    TickType_t   xCompletionTime;             /* Time (in ticks) that the task was completed */
-} DeadlineDrivenTask_t;
 
-typedef struct DeadlineDrivenTaskNode
-{
-    struct DeadlineDrivenTaskNode *pxNext; /* Pointer to the next task in the list */
-    DeadlineDrivenTask_t          xTask;   /* The task */
-} DeadlineDrivenTaskNode_t;
 
 /* Function declarations */
 void vDeadlineDrivenScheduler( void *pvParameters );
