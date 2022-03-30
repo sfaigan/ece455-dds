@@ -1,8 +1,8 @@
 /* Task Monitor */
 
-#include "task_monitor.h"
+#include "deadline_driven_task_monitor.h"
 
-void vTaskMonitor( void *pvParameters )
+void vDeadlineDrivenTaskMonitor( void *pvParameters )
 {
     while( 1 )
 	{

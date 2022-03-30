@@ -80,8 +80,10 @@
 #include "../FreeRTOS_Source/include/task.h"
 #include "../FreeRTOS_Source/include/timers.h"
 /* User includes */
-#include "tasks/deadline_driven_scheduler.h"
+#include "tasks/scheduler/deadline_driven_scheduler.h"
+#include "tasks/scheduler/deadline_driven_scheduler_api.h"
 #include "tasks/deadline_driven_task_generator.h"
+#include "tasks/deadline_driven_task_monitor.h"
 
 static void prvSetupHardware( void );
 /*-----------------------------------------------------------*/
