@@ -81,7 +81,7 @@ void vPrintDeadlineDrivenTaskInfo( DeadlineDrivenTask_t xTask )
 
 void vPrintTaskList( DeadlineDrivenTaskNode_t *pxTaskListHead )
 {
-    printf( "\n**************************************************\n" );
+    printf( "**************************************************\n" );
     DeadlineDrivenTaskNode_t *pxCurrentNode = pxTaskListHead;
     while( pxCurrentNode != NULL )
     {
