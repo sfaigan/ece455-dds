@@ -4,21 +4,36 @@
 
 void vDeadlineDrivenTaskGenerator( void *pvParameters )
 {
-    /* Variables go here */
-    
+    uint8_t ucRequestCounter;
+    uint8_t ucMessagesAvailable = 0;
+    DeadlineDrivenTask_t xTask;
+
     while( 1 )
     {
-        /*
-            Receive from task regeneration requests queue
-                For each task in task regeneration requests queue
-                    Create copy
-                    If completion time != 0 // regeneration of periodic task
-                        Set release time to release time + period
-                        Set absolute deadline to absolute deadline + period
-                        Clear start time
-                        Clear completion time
-                    Send copy to queue
-        */
-        vTaskDelay(1000);
+        ucMessagesAvailable = uxQueueMessagesWaiting(TaskRegenerationRequestsQueueHandle, 1000 );
+        for( ucRequestCounter = 0; ucRequestCounter < ucMessagesAvailable; ucRequestCounter++ )
+        {
+            if ( xQueueReceive(xTaskRegenerationRequestsQueueHandle, &xTask, 1000 ) )
+            {
+                if ( xTask.completion_time!= 0 )
+                {
+                    ulCreateDeadlineDrivenTask( function,
+                                                "function name",
+                                                xTask.xAbsoluteDeadline +xTask.xPeriod,
+                                                xTask.xPeriod,
+                                                xTask.xReleaseTime + xTask.xPeriod
+                                               );
+                }
+                else
+                {
+                /* task is invalid
+                }
+            }
+            else
+            {
+            /* failed to receive message */
+            }
+        }
+        vTaskDelay( 10 );
     }
 }
