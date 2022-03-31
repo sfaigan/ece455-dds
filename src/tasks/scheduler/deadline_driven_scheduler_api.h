@@ -17,8 +17,8 @@
 #define MAX_TASK_NAME_LENGTH 32
 #define NUM_TASK_LISTS 3
 #define CURRENT_TASK_COMPLETE_BIT ( 1 << 0 )
-#define PRIORITY_LOW 4
-#define PRIORITY_HIGH 2
+#define PRIORITY_LOW 1
+#define PRIORITY_HIGH 4
 
 /* Global variable declarations */
 xQueueHandle xNewTasksQueueHandle;

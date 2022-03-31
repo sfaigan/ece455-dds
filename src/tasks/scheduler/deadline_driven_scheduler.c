@@ -14,6 +14,7 @@ void vDeadlineDrivenScheduler( void *pvParameters )
     TickType_t xStartTime = 0;
     TickType_t xCompletionTime = 0;
     MessageType_t xSchedulerMessage;
+    EventBits_t uxBits;
 
     /*
     MessageType_t xSchedulerMessageType;
@@ -26,7 +27,7 @@ void vDeadlineDrivenScheduler( void *pvParameters )
     while( 1 )
     {
         printf( "[Deadline Driven Scheduler] My turn!\n" );
-        while( xQueueReceive( xNewTasksQueueHandle, &xNewTask, 1000 ) )
+        while( xQueueReceive( xNewTasksQueueHandle, &xNewTask, 0 ) )
         {
             if( xNewTask.xAbsoluteDeadline <= xTaskGetTickCount() )
             {
@@ -40,9 +41,8 @@ void vDeadlineDrivenScheduler( void *pvParameters )
 
         if ( pxEarliestDeadlineTaskNode != NULL )
         {
-            vTaskPrioritySet( pxEarliestDeadlineTaskNode->xTask.xFTaskHandle, PRIORITY_LOW );
             xCompletionTime = 0;
-            if( xQueueReceive( xTaskMessagesQueueHandle, &xCompletionTime, 1000 ) )
+            if( xQueueReceive( xTaskMessagesQueueHandle, &xCompletionTime, 0 ) )
             {
                 pxEarliestDeadlineTaskNode->xTask.xCompletionTime = xCompletionTime;
                 vAddTaskToList( &xCompletedTasksHead, pxEarliestDeadlineTaskNode->xTask );
@@ -57,7 +57,7 @@ void vDeadlineDrivenScheduler( void *pvParameters )
             /* If periodic, regenerate */
             if( pxEarliestDeadlineTaskNode->xTask.xPeriod > 0 )
             {
-                xQueueSend( xTaskRegenerationRequestsQueueHandle, &pxEarliestDeadlineTaskNode->xTask, 1000 );
+                xQueueSend( xTaskRegenerationRequestsQueueHandle, &pxEarliestDeadlineTaskNode->xTask, 0 );
             }
 
         }
@@ -98,7 +98,7 @@ void vDeadlineDrivenScheduler( void *pvParameters )
         }
         */
 
-        if( xQueueReceive( xSchedulerMessagesQueueHandle, &xSchedulerMessage, 1000 ) )
+        if( xQueueReceive( xSchedulerMessagesQueueHandle, &xSchedulerMessage, 0 ) )
         {
             printf( "[Deadline Driven Scheduler] Received message.\n" );
             switch( xSchedulerMessage )
@@ -135,7 +135,7 @@ void vDeadlineDrivenScheduler( void *pvParameters )
             {
                 pxCursorNode = pxCursorNode->pxNext;
 
-                if( pxCursorNode->xTask.xReleaseTime >= xTaskGetTickCount() &&
+                if( pxCursorNode->xTask.xReleaseTime <= xTaskGetTickCount() &&
                     pxCursorNode->xTask.xAbsoluteDeadline < xEarliestDeadline )
                 {
                     xEarliestDeadline = pxCursorNode->xTask.xAbsoluteDeadline;
@@ -147,13 +147,14 @@ void vDeadlineDrivenScheduler( void *pvParameters )
             vTaskPrioritySet( pxEarliestDeadlineTaskNode->xTask.xFTaskHandle, PRIORITY_HIGH );
             xEventGroupClearBits( xCurrentTaskCompleteEventGroup, CURRENT_TASK_COMPLETE_BIT );
             pxEarliestDeadlineTaskNode->xTask.xStartTime = xStartTime;
-            xEventGroupWaitBits( xCurrentTaskCompleteEventGroup,
-                                 CURRENT_TASK_COMPLETE_BIT,
-                                 pdFALSE,
-                                 pdFALSE,
-                                 (xEarliestDeadline - xStartTime)
-                               );
+            uxBits = xEventGroupWaitBits( xCurrentTaskCompleteEventGroup,
+                                          CURRENT_TASK_COMPLETE_BIT,
+                                          pdFALSE,
+                                          pdFALSE,
+                                          (xEarliestDeadline - xStartTime)
+                                        );
+            vTaskPrioritySet( pxEarliestDeadlineTaskNode->xTask.xFTaskHandle, PRIORITY_LOW );
         }
-        vTaskDelay(100);
+        vTaskDelay( 10 );
     }
 }

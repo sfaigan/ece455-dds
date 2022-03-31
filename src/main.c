@@ -160,9 +160,9 @@ int main( void )
     vQueueAddToRegistry( xSchedulerMessagesQueueHandle, "Scheduler (Monitor) Messages" );
 
     /* Create tasks */
-    xTaskCreate( vDeadlineDrivenScheduler, "Deadline Driven Scheduler", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
-    xTaskCreate( vDeadlineDrivenTaskGenerator, "Deadline Driven Task Generator", configMINIMAL_STACK_SIZE, NULL, 2, NULL );
-    xTaskCreate( vDeadlineDrivenTaskMonitor, "Deadline Driven Task Monitor", configMINIMAL_STACK_SIZE, NULL, 3, NULL );
+    xTaskCreate( vDeadlineDrivenScheduler, "Deadline Driven Scheduler", configMINIMAL_STACK_SIZE, NULL, 5, NULL );
+    xTaskCreate( vDeadlineDrivenTaskGenerator, "Deadline Driven Task Generator", configMINIMAL_STACK_SIZE, NULL, 3, NULL );
+    xTaskCreate( vDeadlineDrivenTaskMonitor, "Deadline Driven Task Monitor", configMINIMAL_STACK_SIZE, NULL, 2, NULL );
 
     xCurrentTaskCompleteEventGroup = xEventGroupCreate();
     if( xCurrentTaskCompleteEventGroup )

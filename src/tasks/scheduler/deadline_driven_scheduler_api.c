@@ -18,17 +18,24 @@ DeadlineDrivenTaskNode_t *pxCreateTaskNode( DeadlineDrivenTask_t xTask )
     return pxTaskNode;
 }
 
+/* APPEND to list */
 void vAddTaskToList( DeadlineDrivenTaskNode_t **pxTaskListHead, DeadlineDrivenTask_t xNewTask )
 {
-    if( pxTaskListHead == NULL )
+    DeadlineDrivenTaskNode_t *pxNewNode = pxCreateTaskNode( xNewTask );
+
+    if( *pxTaskListHead == NULL )
     {
-        *pxTaskListHead = pxCreateTaskNode( xNewTask );
+        *pxTaskListHead = pxNewNode;
     }
     else
     {
-        DeadlineDrivenTaskNode_t *pxNewNode = pxCreateTaskNode( xNewTask );
-        pxNewNode->pxNext = *pxTaskListHead;
-        *pxTaskListHead = pxNewNode;
+        DeadlineDrivenTaskNode_t *pxCursorNode = *pxTaskListHead;
+        while( pxCursorNode->pxNext != NULL )
+        {
+            pxCursorNode = pxCursorNode->pxNext;
+        }
+
+        pxCursorNode->pxNext = pxNewNode;
     }
 }
 
@@ -63,17 +70,18 @@ void vDeleteTaskFromList( DeadlineDrivenTaskNode_t **pxTaskListHead, DeadlineDri
 void vPrintDeadlineDrivenTaskInfo( DeadlineDrivenTask_t xTask )
 {
     /* printf( "%s\n", xTask.cName ); */
-    printf( "\n**************************************************\n" );
     printf( "ID: %d\n", ( int ) xTask.xId );
     printf( "Absolute Deadline: %d\n", ( int ) xTask.xAbsoluteDeadline );
     printf( "Period: %d\n", ( int ) xTask.xPeriod );
     printf( "Release Time: %d\n", ( int ) xTask.xReleaseTime );
     printf( "Start Time: %d\n", ( int ) xTask.xStartTime );
     printf( "Completion Time: %d\n", ( int ) xTask.xCompletionTime );
+    printf( "**************************************************\n" );
 }
 
 void vPrintTaskList( DeadlineDrivenTaskNode_t *pxTaskListHead )
 {
+    printf( "\n**************************************************\n" );
     DeadlineDrivenTaskNode_t *pxCurrentNode = pxTaskListHead;
     while( pxCurrentNode != NULL )
     {
@@ -147,7 +155,7 @@ void vCompleteDeadlineDrivenTask()
 {
     printf("Task completed!\n");
     TickType_t xCurrentTime = xTaskGetTickCount();
-    xQueueSend( xTaskMessagesQueueHandle, &xCurrentTime, 1000 );
+    xQueueSend( xTaskMessagesQueueHandle, &xCurrentTime, 0 );
     xEventGroupSetBits( xCurrentTaskCompleteEventGroup, CURRENT_TASK_COMPLETE_BIT );
 }
 
@@ -175,6 +183,6 @@ BaseType_t xSchedulerMessageRequest( MessageType_t xRequestType )
     };
     return xQueueSend(xSchedulerMessagesQueueHandle, (void *) &xSchedulerMessage, 1000 );
     */
-    return xQueueSend(xSchedulerMessagesQueueHandle, (void *) &xRequestType, 1000 );
+    return xQueueSend(xSchedulerMessagesQueueHandle, (void *) &xRequestType, 0 );
 }
 
