@@ -7,8 +7,7 @@
 #include <stdio.h>
 #include "../../FreeRTOS_Source/include/FreeRTOS.h"
 #include "../../FreeRTOS_Source/include/task.h"
-
-/* Macros */
+#include "scheduler/deadline_driven_scheduler_api.h"
 
 /* Function declarations */
 void vDeadlineDrivenTaskGenerator( void *pvParameters );

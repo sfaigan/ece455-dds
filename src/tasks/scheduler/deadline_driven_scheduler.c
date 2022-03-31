@@ -41,19 +41,25 @@ void vDeadlineDrivenScheduler( void *pvParameters )
         if ( pxEarliestDeadlineTaskNode != NULL )
         {
             vTaskPrioritySet( pxEarliestDeadlineTaskNode->xTask.xFTaskHandle, PRIORITY_LOW );
-            pxEarliestDeadlineTaskNode->xTask.xCompletionTime = xCompletionTime;
-            xQueueSend( xTaskRegenerationRequestsQueueHandle, &pxEarliestDeadlineTaskNode->xTask, 1000 );
-
+            xCompletionTime = 0;
             if( xQueueReceive( xTaskMessagesQueueHandle, &xCompletionTime, 1000 ) )
             {
+                pxEarliestDeadlineTaskNode->xTask.xCompletionTime = xCompletionTime;
                 vAddTaskToList( &xCompletedTasksHead, pxEarliestDeadlineTaskNode->xTask );
                 vDeleteTaskFromList( &xActiveTasksHead, pxEarliestDeadlineTaskNode->xTask.xId );
             }
-            else if ( xEventGroupGetBits( xCurrentTaskCompleteEventGroup ) == 0 )
+            else if( xEventGroupGetBits( xCurrentTaskCompleteEventGroup ) == 0 )
             {
                 vAddTaskToList( &xOverdueTasksHead, pxEarliestDeadlineTaskNode->xTask );
                 vDeleteTaskFromList( &xActiveTasksHead, pxEarliestDeadlineTaskNode->xTask.xId );
             }
+
+            /* If periodic, regenerate */
+            if( pxEarliestDeadlineTaskNode->xTask.xPeriod > 0 )
+            {
+                xQueueSend( xTaskRegenerationRequestsQueueHandle, &pxEarliestDeadlineTaskNode->xTask, 1000 );
+            }
+
         }
 
         printf( "[Deadline Driven Scheduler] Checking messages...\n" );

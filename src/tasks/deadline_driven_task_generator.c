@@ -10,30 +10,23 @@ void vDeadlineDrivenTaskGenerator( void *pvParameters )
 
     while( 1 )
     {
-        ucMessagesAvailable = uxQueueMessagesWaiting(TaskRegenerationRequestsQueueHandle, 1000 );
+        ucMessagesAvailable = uxQueueMessagesWaiting( xTaskRegenerationRequestsQueueHandle );
         for( ucRequestCounter = 0; ucRequestCounter < ucMessagesAvailable; ucRequestCounter++ )
         {
-            if ( xQueueReceive(xTaskRegenerationRequestsQueueHandle, &xTask, 1000 ) )
+            if( xQueueReceive(xTaskRegenerationRequestsQueueHandle, &xTask, 1000 ) )
             {
-                if ( xTask.completion_time!= 0 )
-                {
-                    ulCreateDeadlineDrivenTask( function,
-                                                "function name",
-                                                xTask.xAbsoluteDeadline +xTask.xPeriod,
-                                                xTask.xPeriod,
-                                                xTask.xReleaseTime + xTask.xPeriod
-                                               );
-                }
-                else
-                {
-                /* task is invalid
-                }
+                ulCreateDeadlineDrivenTaskMetadata( xTask.xFTaskHandle,
+                                                    "",
+                                                    xTask.xAbsoluteDeadline +xTask.xPeriod,
+                                                    xTask.xPeriod,
+                                                    xTask.xReleaseTime + xTask.xPeriod
+                                                  );
             }
             else
             {
-            /* failed to receive message */
+                printf( "[Deadline Driven Task Generator] Failed to receive a task from the queue.\n" );
             }
         }
-        vTaskDelay( 10 );
+        vTaskDelay( 100 );
     }
 }

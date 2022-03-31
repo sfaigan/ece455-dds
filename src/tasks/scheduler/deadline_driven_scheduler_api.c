@@ -64,12 +64,12 @@ void vPrintDeadlineDrivenTaskInfo( DeadlineDrivenTask_t xTask )
 {
     /* printf( "%s\n", xTask.cName ); */
     printf( "\n**************************************************\n" );
-    printf( "ID: %d\n", xTask.xId );
-    printf( "Absolute Deadline: %d\n", xTask.xAbsoluteDeadline );
-    printf( "Period: %d\n", xTask.xPeriod );
-    printf( "Release Time: %d\n", xTask.xReleaseTime );
-    printf( "Start Time: %d\n", xTask.xStartTime );
-    printf( "Completion Time: %d\n", xTask.xCompletionTime );
+    printf( "ID: %d\n", ( int ) xTask.xId );
+    printf( "Absolute Deadline: %d\n", ( int ) xTask.xAbsoluteDeadline );
+    printf( "Period: %d\n", ( int ) xTask.xPeriod );
+    printf( "Release Time: %d\n", ( int ) xTask.xReleaseTime );
+    printf( "Start Time: %d\n", ( int ) xTask.xStartTime );
+    printf( "Completion Time: %d\n", ( int ) xTask.xCompletionTime );
 }
 
 void vPrintTaskList( DeadlineDrivenTaskNode_t *pxTaskListHead )
@@ -92,7 +92,16 @@ uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
     /* Create FreeRTOS task */
     TaskHandle_t xFTaskHandle = NULL;
     xTaskCreate( vTaskFunction, cName, configMINIMAL_STACK_SIZE, NULL, PRIORITY_LOW, &xFTaskHandle );
+    return ulCreateDeadlineDrivenTaskMetadata( xFTaskHandle, cName, xAbsoluteDeadline, xPeriod, xReleaseTime );
+}
 
+uint32_t ulCreateDeadlineDrivenTaskMetadata( TaskHandle_t xFTaskHandle,
+                                             char cName[],
+                                             TickType_t xAbsoluteDeadline,
+                                             TickType_t xPeriod,
+                                             TickType_t xReleaseTime
+                                           )
+{
     /* Create custom task */
     DeadlineDrivenTaskId_t xTaskId = rand();
     DeadlineDrivenTask_t xNewTask =
@@ -110,11 +119,10 @@ uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
     if( xQueueSend( xNewTasksQueueHandle, &xNewTask, 1000 ) )
     {
         printf("New task successfully created and sent to scheduler: %s\n", cName);
+        return 1;
     }
-    else
-    {
-        printf("Failed to send new task to New Tasks Queue.\n");
-    }
+
+    printf("Failed to send new task to New Tasks Queue.\n");
     return 0;
 }
 

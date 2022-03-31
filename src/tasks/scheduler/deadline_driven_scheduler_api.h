@@ -85,6 +85,13 @@ uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
                                      TickType_t xReleaseTime
                                    );
 
+uint32_t ulCreateDeadlineDrivenTaskMetadata( TaskHandle_t xFTaskHandle,
+                                             char cName[],
+                                             TickType_t xAbsoluteDeadline,
+                                             TickType_t xPeriod,
+                                             TickType_t xReleaseTime
+                                           );
+
 void vCompleteDeadlineDrivenTask();
 
 //static DDTaskNode* xReturnActiveDeadlineDrivenTasks();

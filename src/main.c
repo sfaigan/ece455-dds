@@ -88,29 +88,49 @@
 static void prvSetupHardware( void );
 /*-----------------------------------------------------------*/
 
-void vTestTask500( void *pvParameters )
+void vTestTask95( void *pvParameters )
 {
-    printf("Test Task 500 starting!\n");
+    printf("Test Task 95 starting!\n");
+    TickType_t xTickCount;
 
     while( 1 )
     {
-        if( xTaskGetTickCount() >= 500 )
+        xTickCount = xTaskGetTickCount();
+        if( xTickCount >= 95 )
         {
-            printf("Test Task 500 completed!\n");
+            printf( "Test Task 95 completed at %d!\n", (int) xTickCount );
             vCompleteDeadlineDrivenTask();
         }
     }
 }
 
-void vTestTask1000( void *pvParameters )
+void vTestTask150( void *pvParameters )
 {
-    printf("Test Task 1000 starting!\n");
+    printf( "Test Task 150 starting!\n" );
+    TickType_t xTickCount;
 
     while( 1 )
     {
-        if( xTaskGetTickCount() >= 1000 )
+        xTickCount = xTaskGetTickCount();
+        if( xTickCount >= 150 )
         {
-            printf("Test Task 1000 completed!\n");
+            printf( "Test Task 150 completed!\n" );
+            vCompleteDeadlineDrivenTask();
+        }
+    }
+}
+
+void vTestTask250( void *pvParameters )
+{
+    printf( "Test Task 250 starting!\n" );
+    TickType_t xTickCount;
+
+    while( 1 )
+    {
+        xTickCount = xTaskGetTickCount();
+        if( xTickCount >= 250 )
+        {
+            printf( "Test Task 250 completed!\n" );
             vCompleteDeadlineDrivenTask();
         }
     }
@@ -141,9 +161,8 @@ int main( void )
 
     /* Create tasks */
     xTaskCreate( vDeadlineDrivenScheduler, "Deadline Driven Scheduler", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
-//    xTaskCreate( vDeadlineDrivenTaskGenerator, "Deadline Driven Task Generator", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
+    xTaskCreate( vDeadlineDrivenTaskGenerator, "Deadline Driven Task Generator", configMINIMAL_STACK_SIZE, NULL, 2, NULL );
     xTaskCreate( vDeadlineDrivenTaskMonitor, "Deadline Driven Task Monitor", configMINIMAL_STACK_SIZE, NULL, 3, NULL );
-//    xTaskCreate( vDeadlineDrivenTask, "Deadline Driven Task", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
 
     xCurrentTaskCompleteEventGroup = xEventGroupCreate();
     if( xCurrentTaskCompleteEventGroup )
@@ -156,7 +175,9 @@ int main( void )
         printf("Failed to create event group.\n");
     }
 
-    ulCreateDeadlineDrivenTask( vTestTask500 , "Test Task 500", 10000, 10000, 0 );
+    ulCreateDeadlineDrivenTask( vTestTask95, "Test Task 95", 500, 500, 0 );
+    ulCreateDeadlineDrivenTask( vTestTask150, "Test Task 150", 500, 500, 0 );
+    ulCreateDeadlineDrivenTask( vTestTask250, "Test Task 250", 750, 750, 0 );
 
 	/* Start the tasks and timer running. */
 	vTaskStartScheduler();
