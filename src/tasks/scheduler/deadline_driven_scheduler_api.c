@@ -2,13 +2,13 @@
 
 #include "deadline_driven_scheduler_api.h"
 
-static DeadlineDrivenTaskNode_t *pxCreateTaskNode( DeadlineDrivenTask_t xTask )
+DeadlineDrivenTaskNode_t *pxCreateTaskNode( DeadlineDrivenTask_t xTask )
 {
     DeadlineDrivenTaskNode_t *pxTaskNode = pvPortMalloc( sizeof( DeadlineDrivenTaskNode_t ) );
 
     if ( pxTaskNode == NULL )
     {
-        printf( "Failed to allocate a new task node." );
+        printf( "Failed to allocate a new task node.\n" );
         exit( EXIT_FAILURE );
     }
 
@@ -18,7 +18,7 @@ static DeadlineDrivenTaskNode_t *pxCreateTaskNode( DeadlineDrivenTask_t xTask )
     return pxTaskNode;
 }
 
-static void vAddTaskToList( DeadlineDrivenTaskNode_t **pxTaskListHead, DeadlineDrivenTask_t xNewTask )
+void vAddTaskToList( DeadlineDrivenTaskNode_t **pxTaskListHead, DeadlineDrivenTask_t xNewTask )
 {
     if( pxTaskListHead == NULL )
     {
@@ -32,18 +32,18 @@ static void vAddTaskToList( DeadlineDrivenTaskNode_t **pxTaskListHead, DeadlineD
     }
 }
 
-static void vDeleteTaskFromList( DeadlineDrivenTaskNode_t **pxTaskListHead, uint32_t ulTaskId )
+void vDeleteTaskFromList( DeadlineDrivenTaskNode_t **pxTaskListHead, DeadlineDrivenTaskId_t xTaskId )
 {
     DeadlineDrivenTaskNode_t *pxTempNode = *pxTaskListHead;
     DeadlineDrivenTaskNode_t *pxPrevNode;
-    if( pxTempNode != NULL && pxTempNode->xTask.ulId == ulTaskId )
+    if( pxTempNode != NULL && pxTempNode->xTask.xId == xTaskId )
     {
         *pxTaskListHead = pxTempNode->pxNext;
         vPortFree( pxTempNode );
         return;
     }
 
-    while( pxTempNode != NULL && pxTempNode->xTask.ulId != ulTaskId )
+    while( pxTempNode != NULL && pxTempNode->xTask.xId != xTaskId )
     {
         pxPrevNode = pxTempNode;
         pxTempNode = pxTempNode->pxNext;
@@ -51,7 +51,7 @@ static void vDeleteTaskFromList( DeadlineDrivenTaskNode_t **pxTaskListHead, uint
 
     if( pxTempNode == NULL)
     {
-        printf("Failed to delete task.");
+        printf("Failed to delete task.\n");
         return;
     }
 
@@ -60,19 +60,19 @@ static void vDeleteTaskFromList( DeadlineDrivenTaskNode_t **pxTaskListHead, uint
 }
 
 
-static void vPrintDeadlineDrivenTaskInfo( DeadlineDrivenTask_t xTask )
+void vPrintDeadlineDrivenTaskInfo( DeadlineDrivenTask_t xTask )
 {
-    // printf( "%s\n", xTask.cName );
-    printf( "**************************************************\n" );
-    printf( "ID: %lu\n", xTask.ulId );
-    printf( "Absolute Deadline: %lu\n", xTask.xAbsoluteDeadline );
-    printf( "Period: %lu\n", xTask.xPeriod );
-    printf( "Release Time: %lu\n", xTask.xReleaseTime );
-    printf( "Start Time: %lu\n", xTask.xStartTime );
-    printf( "Completion Time: %lu\n", xTask.xCompletionTime );
+    /* printf( "%s\n", xTask.cName ); */
+    printf( "\n**************************************************\n" );
+    printf( "ID: %d\n", xTask.xId );
+    printf( "Absolute Deadline: %d\n", xTask.xAbsoluteDeadline );
+    printf( "Period: %d\n", xTask.xPeriod );
+    printf( "Release Time: %d\n", xTask.xReleaseTime );
+    printf( "Start Time: %d\n", xTask.xStartTime );
+    printf( "Completion Time: %d\n", xTask.xCompletionTime );
 }
 
-static void vPrintTaskList( DeadlineDrivenTaskNode_t *pxTaskListHead )
+void vPrintTaskList( DeadlineDrivenTaskNode_t *pxTaskListHead )
 {
     DeadlineDrivenTaskNode_t *pxCurrentNode = pxTaskListHead;
     while( pxCurrentNode != NULL )
@@ -94,10 +94,10 @@ uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
     xTaskCreate( vTaskFunction, cName, configMINIMAL_STACK_SIZE, NULL, PRIORITY_LOW, &xFTaskHandle );
 
     /* Create custom task */
-    uint32_t ulId = rand();
+    DeadlineDrivenTaskId_t xTaskId = rand();
     DeadlineDrivenTask_t xNewTask =
     {
-        ulId: ulId,
+        xId: xTaskId,
         xFTaskHandle: xFTaskHandle,
         xAbsoluteDeadline: xAbsoluteDeadline,
         xPeriod: xPeriod,
@@ -118,10 +118,22 @@ uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
     return 0;
 }
 
-void vDeleteDeadlineDrivenTask( uint32_t ulTaskId )
+/*
+uint8_t xConvertTaskListToArray( DeadlineDrivenTaskNode_t *pxTaskListHead, DeadlineDrivenTask_t *pxTaskArray )
 {
-    printf("Request to delete task: %lu\n", ulTaskId);
+    DeadlineDrivenTaskNode_t *pxCurrentNode = pxTaskListHead;
+    uint8_t ucCounter = 0;
+
+    while( pxCurrentNode != NULL )
+    {
+        pxTaskArray[ucCounter] = pxCurrentNode->xTask;
+        pxCurrentNode = pxCurrentNode->pxNext;
+        ucCounter++;
+    }
+
+    return ucCounter + 1;
 }
+*/
 
 void vCompleteDeadlineDrivenTask()
 {
@@ -135,40 +147,26 @@ void vCompleteDeadlineDrivenTask()
 //static DDTaskNode* xReturnOverdueDeadlineDrivenTasks();
 //static DDTaskNode* xReturnCompletedDeadlineDrivenTasks();
 
-xSchedulerMessageRequest(MessageType_t RequestType)
+BaseType_t xSchedulerMessageRequest( MessageType_t xRequestType )
 {
-    if( xQueueSend(xTaskMonitorQueueHandle, RequestType, (Tick_Type_t) 10) )
+    /*
+    DeadlineDrivenTask_t xTasks[MAX_TASKS];
+    DeadlineDrivenTask_t xNullTask = { 0 };
+    uint8_t ucNumTasks = 0;
+    uint8_t ucCounter = 0;
+
+    for( ucCounter = 0; ucCounter < MAX_TASKS; ucCounter++ )
     {
-        return 1;
+        xTasks[ucCounter] = xNullTask;
     }
-    else
+    SchedulerMessage_t xSchedulerMessage =
     {
-        return 0;
-    }
+        xMessageType: RequestType,
+        xTasks: xTasks,
+        ucNumTasks: ucNumTasks
+    };
+    return xQueueSend(xSchedulerMessagesQueueHandle, (void *) &xSchedulerMessage, 1000 );
+    */
+    return xQueueSend(xSchedulerMessagesQueueHandle, (void *) &xRequestType, 1000 );
 }
 
-SchedulerMessage_t xCheckSchedulerMessage()
-{
-    SchedulerMessage_t message;
-    if( xQueuePeek(xTaskMonitorQueueHandle, &message, (Tick_Type_t) 10) )
-    {
-        return message;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-StatusMessage_t xGetSchedulerMessage()
-{
-    StatusMessage_t message;
-    if( xQueueRecieve(xTaskMonitorQueueHandle, &message, (Tick_Type_t) 10) )
-    {
-        return message;
-    }
-    else
-    {
-        return 0;
-    }
-}

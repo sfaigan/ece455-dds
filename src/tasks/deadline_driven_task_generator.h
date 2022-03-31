@@ -5,8 +5,8 @@
 
 /* Includes */
 #include <stdio.h>
-#include "../FreeRTOS_Source/include/FreeRTOS.h"
-#include "../FreeRTOS_Source/include/task.h"
+#include "../../FreeRTOS_Source/include/FreeRTOS.h"
+#include "../../FreeRTOS_Source/include/task.h"
 
 /* Macros */
 

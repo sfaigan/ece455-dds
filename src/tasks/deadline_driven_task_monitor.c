@@ -4,70 +4,74 @@
 
 void vDeadlineDrivenTaskMonitor( void *pvParameters )
 {
+    /*
+    SchedulerMessage_t xSchedulerMessage;
+    uint8_t ucCounter1, ucCounter2;
+    */
+
     while( 1 )
 	{
-        DeadlineDrivenTaskNode_t *pxCompletedList, *pxActiveList, *pxOverdueList;
-        SchedulerMessage_t xIncomingMessage;
-        MessageType_t eMessageType;
-
-        xIncomingMessage = xCheckSchedulerMessage();
-        if(incoming_message != 0)
-	    {
-            message_type = incoming_message->MessageType;
-            switch(message_type)
+        printf( "[Deadline Driven Task Monitor] My turn!\n" );
+        /*
+        for ( ucCounter1 = 0; ucCounter1 < NUM_TASK_LISTS; ucCounter1++ )
+        {
+            if ( xQueueReceive( xSchedulerMessagesQueueHandle, &xSchedulerMessage, 1000 ) )
             {
-            /* For cases 0-2 message is outgoing, not for monitor */
-            case 0:
+                switch( xSchedulerMessage.xMessageType )
+                {
+                    case INCOMING_COMPLETED_LIST:
+                        printf( "[Deadline Driven Task Monitor] Completed List:\n" );
+                        break;
+                    case INCOMING_ACTIVE_LIST:
+                        printf( "[Deadline Driven Task Monitor] Active List:\n" );
+                        break;
+                    case INCOMING_OVERDUE_LIST:
+                        printf( "[Deadline Driven Task Monitor] Overdue List:\n" );
+                        break;
+                    default:
+                        printf( "[Deadline Driven Task Monitor] This was unexpected...\n" );
+                }
 
-	    	    break;
-            case 1:
-
-	    	    break;
-            case 2:
-
-	    	    break;
-            case 3:
-	    	    incoming_message = xGetSchedulerMessage();
-	    	    CompletedList = incoming_message->List;
-	    	    break;
-            case 4:
-	    	    incoming_message = xGetSchedulerMessage();
-	    	    ActiveList = incoming_message->List;
-	    	    break;
-            case 5:
-	    	    incoming_message = xGetSchedulerMessage();
-	    	    OverdueList = incoming_message->List;
-	    	    break;
+                for ( ucCounter2 = 0; ucCounter2 < xSchedulerMessage.ucNumTasks; ucCounter2++ )
+                {
+                    vPrintDeadlineDrivenTaskInfo( xSchedulerMessage.xTasks[ucCounter2] );
+                }
             }
-	    }
+            else
+            {
+                printf( "[Deadline Driven Task Monitor] Failed to receive a list from queue." );
+            }
+        }
+        */
+
         /* Request data from scheduler */
-        if (xSchedulerMessageRequest(0))
+        if ( xSchedulerMessageRequest( REQUEST_COMPLETED_LIST ) )
         {
-            printf("Requested completed list");
+            printf("[Deadline Driven Task Monitor] Requested completed list.\n");
         }
         else
         {
-            printf("Completed request failed!");
+            printf("[Deadline Driven Task Monitor] Request for completion task failed!\n");
         }
 
-        if (xSchedulerMessageRequest(1))
+        if ( xSchedulerMessageRequest( REQUEST_ACTIVE_LIST ) )
         {
-            printf("Requested active list");
+            printf("[Deadline Driven Task Monitor] Requested active list.\n");
         }
         else
         {
-            printf("Active request failed!");
+            printf("[Deadline Driven Task Monitor] Request for active task failed!\n");
         }
 
-        if (xSchedulerMessageRequest(2))
+        if ( xSchedulerMessageRequest( REQUEST_OVERDUE_LIST ) )
         {
-            printf("Requested overdue list");
+            printf("[Deadline Driven Task Monitor] Requested overdue list.\n");
         }
         else
         {
-            printf("Overdue request failed!");
+            printf("[Deadline Driven Task Monitor] Request for overdue task failed!\n");
         }
-    }
-
+        vTaskDelay(100);
+	}
 
 }

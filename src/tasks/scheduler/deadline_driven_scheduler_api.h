@@ -6,19 +6,25 @@
 /* Includes */
 #include <stdio.h>
 #include <stdlib.h>
-#include "../FreeRTOS_Source/include/FreeRTOS.h"
-#include "../FreeRTOS_Source/include/task.h"
-#include "../FreeRTOS_Source/include/queue.h"
-#include "../FreeRTOS_Source/include/event_groups.h"
+#include "../../../FreeRTOS_Source/include/FreeRTOS.h"
+#include "../../../FreeRTOS_Source/include/task.h"
+#include "../../../FreeRTOS_Source/include/queue.h"
+#include "../../../FreeRTOS_Source/include/event_groups.h"
 
 /* Macros */
+#define MAX_CONCURRENT_TASKS 1
+#define MAX_TASKS 16
+#define MAX_TASK_NAME_LENGTH 32
+#define NUM_TASK_LISTS 3
 #define CURRENT_TASK_COMPLETE_BIT ( 1 << 0 )
+#define PRIORITY_LOW 4
+#define PRIORITY_HIGH 2
 
 /* Global variable declarations */
 xQueueHandle xNewTasksQueueHandle;
 xQueueHandle xTaskMessagesQueueHandle;
 xQueueHandle xTaskRegenerationRequestsQueueHandle;
-xQueueHandle xTaskMonitorQueueHandle;
+xQueueHandle xSchedulerMessagesQueueHandle;
 EventGroupHandle_t xCurrentTaskCompleteEventGroup;
 
 /* Type definitions */
@@ -42,7 +48,7 @@ typedef struct DeadlineDrivenTaskNode
     DeadlineDrivenTask_t          xTask;       /* The task */
 } DeadlineDrivenTaskNode_t;
 
-typedef enum MessageType
+typedef enum SchedulerMessageType
 {
     REQUEST_COMPLETED_LIST,
     REQUEST_ACTIVE_LIST,
@@ -52,13 +58,26 @@ typedef enum MessageType
     INCOMING_OVERDUE_LIST
 } MessageType_t;
 
+/*
 typedef struct SchedulerMessage
 {
     MessageType_t            xMessageType;
-    DeadlineDrivenTaskNode_t *xListHead;
+    DeadlineDrivenTaskNode_t *xTaskListHead;
+    uint8_t                  ucNumTasks;
 } SchedulerMessage_t;
+*/
 
 /* Function declarations */
+DeadlineDrivenTaskNode_t *pxCreateTaskNode( DeadlineDrivenTask_t xTask );
+
+void vAddTaskToList( DeadlineDrivenTaskNode_t **pxTaskListHead, DeadlineDrivenTask_t xNewTask );
+
+void vDeleteTaskFromList( DeadlineDrivenTaskNode_t **pxTaskListHead, DeadlineDrivenTaskId_t xTaskId );
+
+void vPrintDeadlineDrivenTaskInfo( DeadlineDrivenTask_t xTask );
+
+void vPrintTaskList( DeadlineDrivenTaskNode_t *pxTaskListHead );
+
 uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
                                      char cName[],
                                      TickType_t xAbsoluteDeadline,
@@ -66,17 +85,16 @@ uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
                                      TickType_t xReleaseTime
                                    );
 
-void vDeleteDeadlineDrivenTask( uint32_t ulTaskId );
 void vCompleteDeadlineDrivenTask();
 
 //static DDTaskNode* xReturnActiveDeadlineDrivenTasks();
 //static DDTaskNode* xReturnOverdueDeadlineDrivenTasks();
 //static DDTaskNode* xReturnCompletedDeadlineDrivenTasks();
 
-BaseType_t xSchedulerMessageRequest(MessageType_t xRequestType);
+BaseType_t xSchedulerMessageRequest( MessageType_t xRequestType );
 
-StatusMessage_t xCheckSchedulerMessage();
-
-StatusMessage_t xGetSchedulerMessage();
+/*
+uint8_t xConvertTaskListToArray( DeadlineDrivenTaskNode_t *pxTaskListHead, DeadlineDrivenTask_t *pxTaskArray );
+*/
 
 #endif /* DEADLINE_DRIVEN_SCHEDULER_API_H_ */

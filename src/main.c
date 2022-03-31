@@ -130,28 +130,30 @@ int main( void )
     xNewTasksQueueHandle = xQueueCreate( MAX_TASKS, sizeof( DeadlineDrivenTask_t ) );
     xTaskMessagesQueueHandle = xQueueCreate( MAX_CONCURRENT_TASKS, sizeof( TickType_t ) );
     xTaskRegenerationRequestsQueueHandle = xQueueCreate( MAX_TASKS, sizeof( DeadlineDrivenTask_t ) );
-//    xTaskMonitorQueueHandle = xQueueCreate( MAX_MONITOR_REQUESTS, sizeof( StatusMessage_t ) );
+    /* xSchedulerMessagesQueueHandle = xQueueCreate( NUM_TASK_LISTS, sizeof( SchedulerMessage_t ) ); */
+    xSchedulerMessagesQueueHandle = xQueueCreate( NUM_TASK_LISTS, sizeof( MessageType_t ) );
 
     /* Add queues to the registry, for the benefit of kernel aware debugging */
     vQueueAddToRegistry( xNewTasksQueueHandle, "New Tasks" );
     vQueueAddToRegistry( xTaskMessagesQueueHandle, "Task Messages" );
     vQueueAddToRegistry( xTaskRegenerationRequestsQueueHandle, "Task Regeneration Requests" );
+    vQueueAddToRegistry( xSchedulerMessagesQueueHandle, "Scheduler (Monitor) Messages" );
 
     /* Create tasks */
     xTaskCreate( vDeadlineDrivenScheduler, "Deadline Driven Scheduler", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
 //    xTaskCreate( vDeadlineDrivenTaskGenerator, "Deadline Driven Task Generator", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
-//    xTaskCreate( vDeadlineDrivenTaskMonitor, "Deadline Driven Task Monitor", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
+    xTaskCreate( vDeadlineDrivenTaskMonitor, "Deadline Driven Task Monitor", configMINIMAL_STACK_SIZE, NULL, 3, NULL );
 //    xTaskCreate( vDeadlineDrivenTask, "Deadline Driven Task", configMINIMAL_STACK_SIZE, NULL, 1, NULL );
 
     xCurrentTaskCompleteEventGroup = xEventGroupCreate();
     if( xCurrentTaskCompleteEventGroup )
     {
-        printf("Successfully created event group.");
+        printf("Successfully created event group.\n");
         xEventGroupSetBits( xCurrentTaskCompleteEventGroup, CURRENT_TASK_COMPLETE_BIT );
     }
     else
     {
-        printf("Failed to create event group.");
+        printf("Failed to create event group.\n");
     }
 
     ulCreateDeadlineDrivenTask( vTestTask500 , "Test Task 500", 10000, 10000, 0 );
