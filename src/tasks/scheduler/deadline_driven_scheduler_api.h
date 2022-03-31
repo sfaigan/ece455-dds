@@ -4,12 +4,12 @@
 #define DEADLINE_DRIVEN_SCHEDULER_API_H_
 
 /* Includes */
-#include <stdio.h>
 #include <stdlib.h>
 #include "../../../FreeRTOS_Source/include/FreeRTOS.h"
 #include "../../../FreeRTOS_Source/include/task.h"
 #include "../../../FreeRTOS_Source/include/queue.h"
 #include "../../../FreeRTOS_Source/include/event_groups.h"
+#include "../../tiny_printf.h"
 
 /* Macros */
 #define MAX_CONCURRENT_TASKS 1

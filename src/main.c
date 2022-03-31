@@ -69,7 +69,6 @@
 
 /* Standard includes. */
 #include <stdint.h>
-#include <stdio.h>
 #include <time.h>
 #include "stm32f4_discovery.h"
 /* Kernel includes. */
@@ -84,6 +83,7 @@
 #include "tasks/scheduler/deadline_driven_scheduler_api.h"
 #include "tasks/deadline_driven_task_generator.h"
 #include "tasks/deadline_driven_task_monitor.h"
+#include "tiny_printf.h"
 
 static void prvSetupHardware( void );
 /*-----------------------------------------------------------*/

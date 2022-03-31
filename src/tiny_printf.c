@@ -41,8 +41,7 @@
 */
 
 /* Includes */
-#include <stdarg.h>
-#include <stdio.h>
+#include "tiny_printf.h"
 
 /* External function prototypes (defined in syscalls.c) */
 extern int _write(int fd, char *str, int len);
