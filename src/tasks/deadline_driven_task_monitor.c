@@ -74,7 +74,7 @@ void vDeadlineDrivenTaskMonitor( void *pvParameters )
                 printf("[Deadline Driven Task Monitor] Request for overdue task failed!\n");
             }
         }
-        vTaskDelay( 5000 );
+        vTaskDelay( 100 );
 	}
 
 }
