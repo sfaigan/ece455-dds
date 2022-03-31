@@ -30,29 +30,6 @@ void vDeadlineDrivenScheduler( void *pvParameters )
             }
         }
 
-        if ( pxEarliestDeadlineTaskNode != NULL )
-        {
-            xCompletionTime = 0;
-            if( xQueueReceive( xTaskMessagesQueueHandle, &xCompletionTime, 0 ) )
-            {
-                pxEarliestDeadlineTaskNode->xTask.xCompletionTime = xCompletionTime;
-                vAddTaskToList( &xCompletedTasksHead, pxEarliestDeadlineTaskNode->xTask );
-                vDeleteTaskFromList( &xActiveTasksHead, pxEarliestDeadlineTaskNode->xTask.xId );
-            }
-            else if( xEventGroupGetBits( xCurrentTaskCompleteEventGroup ) == 0 )
-            {
-                vAddTaskToList( &xOverdueTasksHead, pxEarliestDeadlineTaskNode->xTask );
-                vDeleteTaskFromList( &xActiveTasksHead, pxEarliestDeadlineTaskNode->xTask.xId );
-            }
-
-            /* If periodic, regenerate */
-            if( pxEarliestDeadlineTaskNode->xTask.xPeriod > 0 )
-            {
-                xQueueSend( xTaskRegenerationRequestsQueueHandle, &pxEarliestDeadlineTaskNode->xTask, 0 );
-            }
-
-        }
-
         if( xQueueReceive( xSchedulerMessagesQueueHandle, &xSchedulerMessage, 0 ) )
         {
             switch( xSchedulerMessage )
@@ -102,6 +79,24 @@ void vDeadlineDrivenScheduler( void *pvParameters )
                                           (xEarliestDeadline - xStartTime)
                                         );
             vTaskPrioritySet( pxEarliestDeadlineTaskNode->xTask.xFTaskHandle, PRIORITY_LOW );
+            xCompletionTime = 0;
+            if( xQueueReceive( xTaskMessagesQueueHandle, &xCompletionTime, 0 ) )
+            {
+                pxEarliestDeadlineTaskNode->xTask.xCompletionTime = xCompletionTime;
+                vAddTaskToList( &xCompletedTasksHead, pxEarliestDeadlineTaskNode->xTask );
+                vDeleteTaskFromList( &xActiveTasksHead, pxEarliestDeadlineTaskNode->xTask.xId );
+            }
+            else if( ( uxBits & CURRENT_TASK_COMPLETE_BIT ) != 0 )
+            {
+                vAddTaskToList( &xOverdueTasksHead, pxEarliestDeadlineTaskNode->xTask );
+                vDeleteTaskFromList( &xActiveTasksHead, pxEarliestDeadlineTaskNode->xTask.xId );
+            }
+
+            /* If periodic, regenerate */
+            if( pxEarliestDeadlineTaskNode->xTask.xPeriod > 0 )
+            {
+                xQueueSend( xTaskRegenerationRequestsQueueHandle, &pxEarliestDeadlineTaskNode->xTask, 0 );
+            }
         }
         vTaskDelay( 10 );
     }
