@@ -18,7 +18,6 @@ void vDeadlineDrivenScheduler( void *pvParameters )
     
     while( 1 )
     {
-        printf( "[Deadline Driven Scheduler] My turn!\n" );
         while( xQueueReceive( xNewTasksQueueHandle, &xNewTask, 0 ) )
         {
             if( xNewTask.xAbsoluteDeadline <= xTaskGetTickCount() )
@@ -54,38 +53,29 @@ void vDeadlineDrivenScheduler( void *pvParameters )
 
         }
 
-        printf( "[Deadline Driven Scheduler] Checking messages...\n" );
-
         if( xQueueReceive( xSchedulerMessagesQueueHandle, &xSchedulerMessage, 0 ) )
         {
-            printf( "[Deadline Driven Scheduler] Received message.\n" );
             switch( xSchedulerMessage )
             {
                 case REQUEST_COMPLETED_LIST:
-                    printf( "[Deadline Driven Scheduler] Monitor requested completed list.\n" );
+                    printf( "Completed Tasks:\n" );
                     vPrintTaskList( xCompletedTasksHead );
                     break;
                 case REQUEST_ACTIVE_LIST:
-                    printf( "[Deadline Driven Scheduler] Monitor requested active list.\n" );
+                    printf( "Active Tasks:\n" );
                     vPrintTaskList( xActiveTasksHead );
                     break;
                 case REQUEST_OVERDUE_LIST:
-                    printf( "[Deadline Driven Scheduler] Monitor requested overdue list.\n" );
+                    printf( "Overdue Tasks:\n" );
                     vPrintTaskList( xOverdueTasksHead );
                     break;
                 default:
                     printf( "[Deadline Driven Scheduler] Unknown message found.\n" );
             }
         }
-        else
-        {
-            printf( "[Deadline Driven Scheduler] No message found :(\n" );
-        }
 
         if( xActiveTasksHead != NULL )
         {
-            printf( "[Deadline Driven Scheduler]\n" );
-            vPrintTaskList( xActiveTasksHead );
             pxCursorNode = xActiveTasksHead;
             xEarliestDeadline = pxCursorNode->xTask.xAbsoluteDeadline;
             pxEarliestDeadlineTaskNode = pxCursorNode;

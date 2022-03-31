@@ -90,7 +90,6 @@ static void prvSetupHardware( void );
 
 void vTestTask95( void *pvParameters )
 {
-    printf("Test Task 95 starting!\n");
     TickType_t xTickCount;
 
     while( 1 )
@@ -98,7 +97,6 @@ void vTestTask95( void *pvParameters )
         xTickCount = xTaskGetTickCount();
         if( xTickCount >= 95 )
         {
-            printf( "Test Task 95 completed at %d!\n", (int) xTickCount );
             vCompleteDeadlineDrivenTask();
         }
     }
@@ -106,7 +104,6 @@ void vTestTask95( void *pvParameters )
 
 void vTestTask150( void *pvParameters )
 {
-    printf( "Test Task 150 starting!\n" );
     TickType_t xTickCount;
 
     while( 1 )
@@ -114,7 +111,6 @@ void vTestTask150( void *pvParameters )
         xTickCount = xTaskGetTickCount();
         if( xTickCount >= 150 )
         {
-            printf( "Test Task 150 completed!\n" );
             vCompleteDeadlineDrivenTask();
         }
     }
@@ -122,7 +118,6 @@ void vTestTask150( void *pvParameters )
 
 void vTestTask250( void *pvParameters )
 {
-    printf( "Test Task 250 starting!\n" );
     TickType_t xTickCount;
 
     while( 1 )
@@ -130,7 +125,6 @@ void vTestTask250( void *pvParameters )
         xTickCount = xTaskGetTickCount();
         if( xTickCount >= 250 )
         {
-            printf( "Test Task 250 completed!\n" );
             vCompleteDeadlineDrivenTask();
         }
     }
@@ -167,12 +161,12 @@ int main( void )
     xCurrentTaskCompleteEventGroup = xEventGroupCreate();
     if( xCurrentTaskCompleteEventGroup )
     {
-        printf("Successfully created event group.\n");
         xEventGroupSetBits( xCurrentTaskCompleteEventGroup, CURRENT_TASK_COMPLETE_BIT );
     }
     else
     {
-        printf("Failed to create event group.\n");
+        printf("Failed to create event group for task completion.\n");
+        return EXIT_FAILURE;
     }
 
     ulCreateDeadlineDrivenTask( vTestTask95, "Test Task 95", 500, 500, 0 );
@@ -182,7 +176,7 @@ int main( void )
 	/* Start the tasks and timer running. */
 	vTaskStartScheduler();
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 /*-----------------------------------------------------------*/
 

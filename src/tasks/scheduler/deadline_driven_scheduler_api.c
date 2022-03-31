@@ -58,7 +58,7 @@ void vDeleteTaskFromList( DeadlineDrivenTaskNode_t **pxTaskListHead, DeadlineDri
 
     if( pxTempNode == NULL)
     {
-        printf("Failed to delete task.\n");
+        printf("Request to delete task. Could not find task matching ID %d.\n", ( int ) xTaskId);
         return;
     }
 
@@ -126,13 +126,8 @@ uint32_t ulCreateDeadlineDrivenTaskMetadata( TaskHandle_t xFTaskHandle,
 
     if( xQueueSend( xNewTasksQueueHandle, &xNewTask, 1000 ) )
     {
-        printf("New task successfully created and sent to scheduler: %s\n", cName);
-        return 1;
+        return pdPASS;
     }
-
-    printf("Failed to send new task to New Tasks Queue.\n");
-    return 0;
-}
 
     printf("Failed to send the following task to the New Tasks Queue:\n");
     vPrintDeadlineDrivenTaskInfo( xNewTask );
@@ -142,7 +137,6 @@ uint32_t ulCreateDeadlineDrivenTaskMetadata( TaskHandle_t xFTaskHandle,
 
 void vCompleteDeadlineDrivenTask()
 {
-    printf("Task completed!\n");
     TickType_t xCurrentTime = xTaskGetTickCount();
     xQueueSend( xTaskMessagesQueueHandle, &xCurrentTime, 0 );
     xEventGroupSetBits( xCurrentTaskCompleteEventGroup, CURRENT_TASK_COMPLETE_BIT );

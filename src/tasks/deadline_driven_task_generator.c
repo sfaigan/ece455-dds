@@ -10,7 +10,6 @@ void vDeadlineDrivenTaskGenerator( void *pvParameters )
 
     while( 1 )
     {
-        printf( "[Deadline Driven Task Generator] My turn!\n" );
         ucMessagesAvailable = uxQueueMessagesWaiting( xTaskRegenerationRequestsQueueHandle );
         for( ucRequestCounter = 0; ucRequestCounter < ucMessagesAvailable; ucRequestCounter++ )
         {
