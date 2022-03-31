@@ -134,22 +134,11 @@ uint32_t ulCreateDeadlineDrivenTaskMetadata( TaskHandle_t xFTaskHandle,
     return 0;
 }
 
-/*
-uint8_t xConvertTaskListToArray( DeadlineDrivenTaskNode_t *pxTaskListHead, DeadlineDrivenTask_t *pxTaskArray )
-{
-    DeadlineDrivenTaskNode_t *pxCurrentNode = pxTaskListHead;
-    uint8_t ucCounter = 0;
+    printf("Failed to send the following task to the New Tasks Queue:\n");
+    vPrintDeadlineDrivenTaskInfo( xNewTask );
 
-    while( pxCurrentNode != NULL )
-    {
-        pxTaskArray[ucCounter] = pxCurrentNode->xTask;
-        pxCurrentNode = pxCurrentNode->pxNext;
-        ucCounter++;
-    }
-
-    return ucCounter + 1;
+    return pdFAIL;
 }
-*/
 
 void vCompleteDeadlineDrivenTask()
 {
@@ -159,30 +148,8 @@ void vCompleteDeadlineDrivenTask()
     xEventGroupSetBits( xCurrentTaskCompleteEventGroup, CURRENT_TASK_COMPLETE_BIT );
 }
 
-//static DDTaskNode* xReturnActiveDeadlineDrivenTasks();
-//static DDTaskNode* xReturnOverdueDeadlineDrivenTasks();
-//static DDTaskNode* xReturnCompletedDeadlineDrivenTasks();
-
 BaseType_t xSchedulerMessageRequest( MessageType_t xRequestType )
 {
-    /*
-    DeadlineDrivenTask_t xTasks[MAX_TASKS];
-    DeadlineDrivenTask_t xNullTask = { 0 };
-    uint8_t ucNumTasks = 0;
-    uint8_t ucCounter = 0;
-
-    for( ucCounter = 0; ucCounter < MAX_TASKS; ucCounter++ )
-    {
-        xTasks[ucCounter] = xNullTask;
-    }
-    SchedulerMessage_t xSchedulerMessage =
-    {
-        xMessageType: RequestType,
-        xTasks: xTasks,
-        ucNumTasks: ucNumTasks
-    };
-    return xQueueSend(xSchedulerMessagesQueueHandle, (void *) &xSchedulerMessage, 1000 );
-    */
     return xQueueSend(xSchedulerMessagesQueueHandle, (void *) &xRequestType, 0 );
 }
 

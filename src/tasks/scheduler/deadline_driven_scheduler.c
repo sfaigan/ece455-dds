@@ -15,14 +15,6 @@ void vDeadlineDrivenScheduler( void *pvParameters )
     TickType_t xCompletionTime = 0;
     MessageType_t xSchedulerMessage;
     EventBits_t uxBits;
-
-    /*
-    MessageType_t xSchedulerMessageType;
-    SchedulerMessage_t xSchedulerMessage;
-    DeadlineDrivenTask_t xTaskList[MAX_TASKS];
-    uint8_t ucCounter;
-    uint8_t ucNumTasks;
-    */
     
     while( 1 )
     {
@@ -63,40 +55,6 @@ void vDeadlineDrivenScheduler( void *pvParameters )
         }
 
         printf( "[Deadline Driven Scheduler] Checking messages...\n" );
-
-        /*
-        if( xQueueReceive( xSchedulerMessagesQueueHandle, (void *) &xSchedulerMessage, 1000 ) )
-        {
-            printf( "[Deadline Driven Scheduler] Received message." );
-            switch( xSchedulerMessage.xMessageType )
-            {
-                printf( "[Deadline Driven Scheduler] Monitor requested completed list." );
-                case REQUEST_COMPLETED_LIST:
-                    ucNumTasks = xConvertTaskListToArray( xCompletedTasksHead, xTaskList );
-                    xSchedulerMessage.xMessageType = INCOMING_COMPLETED_LIST;
-                    break;
-                case REQUEST_ACTIVE_LIST:
-                    printf( "[Deadline Driven Scheduler] Monitor requested active list." );
-                    ucNumTasks = xConvertTaskListToArray( xActiveTasksHead, xTaskList );
-                    xSchedulerMessage.xMessageType = INCOMING_ACTIVE_LIST;
-                    break;
-                case REQUEST_OVERDUE_LIST:
-                    printf( "[Deadline Driven Scheduler] Monitor requested overdue list." );
-                    ucNumTasks = xConvertTaskListToArray( xOverdueTasksHead, xTaskList );
-                    xSchedulerMessage.xMessageType = INCOMING_OVERDUE_LIST;
-                    break;
-                default:
-                    printf( "[Deadline Driven Scheduler] Message was not for me. Sending it back. Sorry about that." );
-            }
-            xSchedulerMessage.xTasks = xTaskList;
-            xSchedulerMessage.ucNumTasks = ucNumTasks;
-            xQueueSend( xSchedulerMessagesQueueHandle, (void *) &xSchedulerMessage, 1000 );
-        }
-        else
-        {
-            printf( "[Deadline Driven Scheduler] No message found :(" );
-        }
-        */
 
         if( xQueueReceive( xSchedulerMessagesQueueHandle, &xSchedulerMessage, 0 ) )
         {

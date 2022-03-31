@@ -58,15 +58,6 @@ typedef enum SchedulerMessageType
     INCOMING_OVERDUE_LIST
 } MessageType_t;
 
-/*
-typedef struct SchedulerMessage
-{
-    MessageType_t            xMessageType;
-    DeadlineDrivenTaskNode_t *xTaskListHead;
-    uint8_t                  ucNumTasks;
-} SchedulerMessage_t;
-*/
-
 /* Function declarations */
 DeadlineDrivenTaskNode_t *pxCreateTaskNode( DeadlineDrivenTask_t xTask );
 
@@ -94,14 +85,6 @@ uint32_t ulCreateDeadlineDrivenTaskMetadata( TaskHandle_t xFTaskHandle,
 
 void vCompleteDeadlineDrivenTask();
 
-//static DDTaskNode* xReturnActiveDeadlineDrivenTasks();
-//static DDTaskNode* xReturnOverdueDeadlineDrivenTasks();
-//static DDTaskNode* xReturnCompletedDeadlineDrivenTasks();
-
 BaseType_t xSchedulerMessageRequest( MessageType_t xRequestType );
-
-/*
-uint8_t xConvertTaskListToArray( DeadlineDrivenTaskNode_t *pxTaskListHead, DeadlineDrivenTask_t *pxTaskArray );
-*/
 
 #endif /* DEADLINE_DRIVEN_SCHEDULER_API_H_ */

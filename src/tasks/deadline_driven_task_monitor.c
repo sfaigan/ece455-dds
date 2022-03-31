@@ -4,46 +4,9 @@
 
 void vDeadlineDrivenTaskMonitor( void *pvParameters )
 {
-    /*
-    SchedulerMessage_t xSchedulerMessage;
-    uint8_t ucCounter1, ucCounter2;
-    */
-
     while( 1 )
 	{
         printf( "[Deadline Driven Task Monitor] My turn!\n" );
-        /*
-        for ( ucCounter1 = 0; ucCounter1 < NUM_TASK_LISTS; ucCounter1++ )
-        {
-            if ( xQueueReceive( xSchedulerMessagesQueueHandle, &xSchedulerMessage, 1000 ) )
-            {
-                switch( xSchedulerMessage.xMessageType )
-                {
-                    case INCOMING_COMPLETED_LIST:
-                        printf( "[Deadline Driven Task Monitor] Completed List:\n" );
-                        break;
-                    case INCOMING_ACTIVE_LIST:
-                        printf( "[Deadline Driven Task Monitor] Active List:\n" );
-                        break;
-                    case INCOMING_OVERDUE_LIST:
-                        printf( "[Deadline Driven Task Monitor] Overdue List:\n" );
-                        break;
-                    default:
-                        printf( "[Deadline Driven Task Monitor] This was unexpected...\n" );
-                }
-
-                for ( ucCounter2 = 0; ucCounter2 < xSchedulerMessage.ucNumTasks; ucCounter2++ )
-                {
-                    vPrintDeadlineDrivenTaskInfo( xSchedulerMessage.xTasks[ucCounter2] );
-                }
-            }
-            else
-            {
-                printf( "[Deadline Driven Task Monitor] Failed to receive a list from queue." );
-            }
-        }
-        */
-
         /* Request data from scheduler */
         if( uxQueueMessagesWaiting( xTaskRegenerationRequestsQueueHandle ) == 0 )
         {
