@@ -69,6 +69,7 @@ void vDeadlineDrivenScheduler( void *pvParameters )
             }
 
             xStartTime = xTaskGetTickCount();
+            printf("%s released at %d\n", pxEarliestDeadlineTaskNode->xTask.cName, (int) pxEarliestDeadlineTaskNode->xTask.xReleaseTime);
             vTaskPrioritySet( pxEarliestDeadlineTaskNode->xTask.xFTaskHandle, PRIORITY_HIGH );
             xEventGroupClearBits( xCurrentTaskCompleteEventGroup, CURRENT_TASK_COMPLETE_BIT );
             pxEarliestDeadlineTaskNode->xTask.xStartTime = xStartTime;
@@ -83,6 +84,7 @@ void vDeadlineDrivenScheduler( void *pvParameters )
             if( xQueueReceive( xTaskMessagesQueueHandle, &xCompletionTime, 0 ) )
             {
                 pxEarliestDeadlineTaskNode->xTask.xCompletionTime = xCompletionTime;
+                printf("%s completed at %d\n", pxEarliestDeadlineTaskNode->xTask.cName, (int) pxEarliestDeadlineTaskNode->xTask.xCompletionTime);
                 vAddTaskToList( &xCompletedTasksHead, pxEarliestDeadlineTaskNode->xTask );
                 vDeleteTaskFromList( &xActiveTasksHead, pxEarliestDeadlineTaskNode->xTask.xId );
             }
@@ -98,6 +100,6 @@ void vDeadlineDrivenScheduler( void *pvParameters )
                 xQueueSend( xTaskRegenerationRequestsQueueHandle, &pxEarliestDeadlineTaskNode->xTask, 0 );
             }
         }
-        vTaskDelay( 10 );
+        vTaskDelay( 1 );
     }
 }

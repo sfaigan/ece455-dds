@@ -16,7 +16,7 @@ void vDeadlineDrivenTaskGenerator( void *pvParameters )
             if( xQueueReceive(xTaskRegenerationRequestsQueueHandle, &xTask, 1000 ) )
             {
                 ulCreateDeadlineDrivenTaskMetadata( xTask.xFTaskHandle,
-                                                    "",
+                                                    xTask.cName,
                                                     xTask.xAbsoluteDeadline +xTask.xPeriod,
                                                     xTask.xPeriod,
                                                     xTask.xReleaseTime + xTask.xPeriod

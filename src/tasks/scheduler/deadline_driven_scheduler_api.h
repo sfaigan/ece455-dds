@@ -5,6 +5,7 @@
 
 /* Includes */
 #include <stdlib.h>
+#include <string.h>
 #include "../../../FreeRTOS_Source/include/FreeRTOS.h"
 #include "../../../FreeRTOS_Source/include/task.h"
 #include "../../../FreeRTOS_Source/include/queue.h"
@@ -33,7 +34,7 @@ typedef uint32_t DeadlineDrivenTaskId_t;
 typedef struct DeadlineDrivenTask
 {
     DeadlineDrivenTaskId_t xId;                /* Unique identifier for the task */
-    //char  cName[MAX_TASK_NAME_LENGTH];       /* Text name for the task */
+    char  cName[MAX_TASK_NAME_LENGTH];       /* Text name for the task */
     TaskHandle_t           xFTaskHandle;       /* Handle of the corresponding FreeRTOS task */
     TickType_t             xAbsoluteDeadline;  /* Time (in ticks) that the task must be completed by */
     TickType_t             xPeriod;            /* The task's period in ticks */

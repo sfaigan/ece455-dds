@@ -88,45 +88,36 @@
 static void prvSetupHardware( void );
 /*-----------------------------------------------------------*/
 
-void vTestTask95( void *pvParameters )
+void vTestTask1( void *pvParameters )
 {
-    TickType_t xTickCount;
-
+    TickType_t xStartTime;
     while( 1 )
     {
-        xTickCount = xTaskGetTickCount();
-        if( xTickCount >= 95 )
-        {
-            vCompleteDeadlineDrivenTask();
-        }
+        xStartTime = xTaskGetTickCount();
+        while ( xTaskGetTickCount() - xStartTime < 95 );
+        vCompleteDeadlineDrivenTask();
     }
 }
 
-void vTestTask150( void *pvParameters )
+void vTestTask2( void *pvParameters )
 {
-    TickType_t xTickCount;
-
+    TickType_t xStartTime;
     while( 1 )
     {
-        xTickCount = xTaskGetTickCount();
-        if( xTickCount >= 150 )
-        {
-            vCompleteDeadlineDrivenTask();
-        }
+        xStartTime = xTaskGetTickCount();
+        while ( xTaskGetTickCount() - xStartTime < 150 );
+        vCompleteDeadlineDrivenTask();
     }
 }
 
-void vTestTask250( void *pvParameters )
+void vTestTask3( void *pvParameters )
 {
-    TickType_t xTickCount;
-
+    TickType_t xStartTime;
     while( 1 )
     {
-        xTickCount = xTaskGetTickCount();
-        if( xTickCount >= 250 )
-        {
-            vCompleteDeadlineDrivenTask();
-        }
+        xStartTime = xTaskGetTickCount();
+        while ( xTaskGetTickCount() - xStartTime < 250 );
+        vCompleteDeadlineDrivenTask();
     }
 }
 
@@ -144,7 +135,6 @@ int main( void )
     xNewTasksQueueHandle = xQueueCreate( MAX_TASKS, sizeof( DeadlineDrivenTask_t ) );
     xTaskMessagesQueueHandle = xQueueCreate( MAX_CONCURRENT_TASKS, sizeof( TickType_t ) );
     xTaskRegenerationRequestsQueueHandle = xQueueCreate( MAX_TASKS, sizeof( DeadlineDrivenTask_t ) );
-    /* xSchedulerMessagesQueueHandle = xQueueCreate( NUM_TASK_LISTS, sizeof( SchedulerMessage_t ) ); */
     xSchedulerMessagesQueueHandle = xQueueCreate( NUM_TASK_LISTS, sizeof( MessageType_t ) );
 
     /* Add queues to the registry, for the benefit of kernel aware debugging */
@@ -169,9 +159,9 @@ int main( void )
         return EXIT_FAILURE;
     }
 
-    ulCreateDeadlineDrivenTask( vTestTask95, "Test Task 95", 500, 500, 0 );
-    ulCreateDeadlineDrivenTask( vTestTask150, "Test Task 150", 500, 500, 0 );
-    ulCreateDeadlineDrivenTask( vTestTask250, "Test Task 250", 750, 750, 0 );
+    ulCreateDeadlineDrivenTask( vTestTask1, "Task 1", 500, 500, 0 );
+    ulCreateDeadlineDrivenTask( vTestTask2, "Task 2", 500, 500, 0 );
+    ulCreateDeadlineDrivenTask( vTestTask3, "Task 3", 750, 750, 0 );
 
 	/* Start the tasks and timer running. */
 	vTaskStartScheduler();

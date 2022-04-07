@@ -69,7 +69,7 @@ void vDeleteTaskFromList( DeadlineDrivenTaskNode_t **pxTaskListHead, DeadlineDri
 
 void vPrintDeadlineDrivenTaskInfo( DeadlineDrivenTask_t xTask )
 {
-    /* printf( "%s\n", xTask.cName ); */
+    printf( "%s\n", xTask.cName );
     printf( "ID: %d\n", ( int ) xTask.xId );
     printf( "Absolute Deadline: %d\n", ( int ) xTask.xAbsoluteDeadline );
     printf( "Period: %d\n", ( int ) xTask.xPeriod );
@@ -122,7 +122,7 @@ uint32_t ulCreateDeadlineDrivenTaskMetadata( TaskHandle_t xFTaskHandle,
         xStartTime: 0,
         xCompletionTime: 0
     };
-    /*  strcpy(xNewTask.cName, cName); */
+    strncpy( xNewTask.cName, cName, MAX_TASK_NAME_LENGTH-1 );
 
     if( xQueueSend( xNewTasksQueueHandle, &xNewTask, 1000 ) )
     {
