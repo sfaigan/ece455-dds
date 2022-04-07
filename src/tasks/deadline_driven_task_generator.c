@@ -27,6 +27,6 @@ void vDeadlineDrivenTaskGenerator( void *pvParameters )
                 printf( "[Deadline Driven Task Generator] Failed to receive a task from the queue.\n" );
             }
         }
-        vTaskDelay( 100 );
+        vTaskDelay( 1 );
     }
 }

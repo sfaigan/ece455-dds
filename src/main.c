@@ -144,9 +144,9 @@ int main( void )
     vQueueAddToRegistry( xSchedulerMessagesQueueHandle, "Scheduler (Monitor) Messages" );
 
     /* Create tasks */
-    xTaskCreate( vDeadlineDrivenScheduler, "Deadline Driven Scheduler", configMINIMAL_STACK_SIZE, NULL, 5, NULL );
-    xTaskCreate( vDeadlineDrivenTaskGenerator, "Deadline Driven Task Generator", configMINIMAL_STACK_SIZE, NULL, 3, NULL );
-    xTaskCreate( vDeadlineDrivenTaskMonitor, "Deadline Driven Task Monitor", configMINIMAL_STACK_SIZE, NULL, 2, NULL );
+    xTaskCreate( vDeadlineDrivenScheduler, "DDS", configMINIMAL_STACK_SIZE, NULL, 5, NULL );
+    xTaskCreate( vDeadlineDrivenTaskGenerator, "Generator", configMINIMAL_STACK_SIZE, NULL, 3, NULL );
+    xTaskCreate( vDeadlineDrivenTaskMonitor, "Monitor", configMINIMAL_STACK_SIZE, NULL, 2, NULL );
 
     xCurrentTaskCompleteEventGroup = xEventGroupCreate();
     if( xCurrentTaskCompleteEventGroup )
@@ -159,7 +159,7 @@ int main( void )
         return EXIT_FAILURE;
     }
 
-    ulCreateDeadlineDrivenTask( vTestTask1, "Task 1", 500, 500, 0 );
+    ulCreateDeadlineDrivenTask( vTestTask1, "Task 1", 250, 250, 0 );
     ulCreateDeadlineDrivenTask( vTestTask2, "Task 2", 500, 500, 0 );
     ulCreateDeadlineDrivenTask( vTestTask3, "Task 3", 750, 750, 0 );
 
