@@ -75,10 +75,10 @@ void vDeadlineDrivenScheduler( void *pvParameters )
                 xStartTime = xTaskGetTickCount();
                 printf("%s released at %d\n", pxEarliestDeadlineTaskNode->xTask.cName, (int) pxEarliestDeadlineTaskNode->xTask.xReleaseTime);
                 vTaskPrioritySet( pxEarliestDeadlineTaskNode->xTask.xFTaskHandle, PRIORITY_HIGH );
-                xEventGroupClearBits( xCurrentTaskCompleteEventGroup, CURRENT_TASK_COMPLETE_BIT );
+                ucClearNthEventBit( CURRENT_TASK_COMPLETE_BIT );
                 pxEarliestDeadlineTaskNode->xTask.xStartTime = xStartTime;
-                uxBits = xEventGroupWaitBits( xCurrentTaskCompleteEventGroup,
-                                              CURRENT_TASK_COMPLETE_BIT,
+                uxBits = xEventGroupWaitBits( xTaskEventGroup,
+                                              EVENT_BIT( CURRENT_TASK_COMPLETE_BIT ),
                                               pdFALSE,
                                               pdFALSE,
                                               (xEarliestDeadline - xStartTime)
@@ -92,9 +92,10 @@ void vDeadlineDrivenScheduler( void *pvParameters )
                     vAddTaskToList( &xCompletedTasksHead, pxEarliestDeadlineTaskNode->xTask );
                     vDeleteTaskFromList( &xActiveTasksHead, pxEarliestDeadlineTaskNode->xTask.xId );
                 }
-                else if( ( uxBits & CURRENT_TASK_COMPLETE_BIT ) == 0 )
+                else if( ( uxBits & EVENT_BIT( CURRENT_TASK_COMPLETE_BIT ) ) == 0 )
                 {
                     printf("%s overdue at %d\n", pxEarliestDeadlineTaskNode->xTask.cName, (int) xTaskGetTickCount() );
+                    ucSetNthEventBit( pxEarliestDeadlineTaskNode->xTask.ucTaskNumber );
                     vAddTaskToList( &xOverdueTasksHead, pxEarliestDeadlineTaskNode->xTask );
                     vDeleteTaskFromList( &xActiveTasksHead, pxEarliestDeadlineTaskNode->xTask.xId );
                 }

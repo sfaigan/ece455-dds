@@ -17,7 +17,8 @@
 #define MAX_TASKS 16
 #define MAX_TASK_NAME_LENGTH 32
 #define NUM_TASK_LISTS 3
-#define CURRENT_TASK_COMPLETE_BIT ( 1 << 0 )
+#define CURRENT_TASK_COMPLETE_BIT 0
+#define EVENT_BIT( N ) ( 1 << N )
 #define PRIORITY_LOW 1
 #define PRIORITY_HIGH 4
 
@@ -26,21 +27,22 @@ xQueueHandle xNewTasksQueueHandle;
 xQueueHandle xTaskMessagesQueueHandle;
 xQueueHandle xTaskRegenerationRequestsQueueHandle;
 xQueueHandle xSchedulerMessagesQueueHandle;
-EventGroupHandle_t xCurrentTaskCompleteEventGroup;
+EventGroupHandle_t xTaskEventGroup;
 
 /* Type definitions */
 typedef uint32_t DeadlineDrivenTaskId_t;
 
 typedef struct DeadlineDrivenTask
 {
-    DeadlineDrivenTaskId_t xId;                /* Unique identifier for the task */
-    char  cName[MAX_TASK_NAME_LENGTH];       /* Text name for the task */
-    TaskHandle_t           xFTaskHandle;       /* Handle of the corresponding FreeRTOS task */
-    TickType_t             xAbsoluteDeadline;  /* Time (in ticks) that the task must be completed by */
-    TickType_t             xPeriod;            /* The task's period in ticks */
-    TickType_t             xReleaseTime;       /* Time (in ticks) when the task is released to the DDS */
-    TickType_t             xStartTime;         /* Time (in ticks) when the task was started */
-    TickType_t             xCompletionTime;    /* Time (in ticks) that the task was completed */
+    DeadlineDrivenTaskId_t xId;                             /* Unique identifier for the task */
+    uint8_t                ucTaskNumber;                    /* Task number */
+    char                   cName[MAX_TASK_NAME_LENGTH];     /* Text name for the task */
+    TaskHandle_t           xFTaskHandle;                    /* Handle of the corresponding FreeRTOS task */
+    TickType_t             xAbsoluteDeadline;               /* Time (in ticks) that the task must be completed by */
+    TickType_t             xPeriod;                         /* The task's period in ticks */
+    TickType_t             xReleaseTime;                    /* Time (in ticks) when the task is released to the DDS */
+    TickType_t             xStartTime;                      /* Time (in ticks) when the task was started */
+    TickType_t             xCompletionTime;                 /* Time (in ticks) that the task was completed */
 } DeadlineDrivenTask_t;
 
 typedef struct DeadlineDrivenTaskNode
@@ -79,6 +81,7 @@ uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
 
 uint32_t ulCreateDeadlineDrivenTaskMetadata( TaskHandle_t xFTaskHandle,
                                              char cName[],
+                                             uint8_t ucTaskNumber,
                                              TickType_t xAbsoluteDeadline,
                                              TickType_t xPeriod,
                                              TickType_t xReleaseTime
@@ -87,5 +90,11 @@ uint32_t ulCreateDeadlineDrivenTaskMetadata( TaskHandle_t xFTaskHandle,
 void vCompleteDeadlineDrivenTask();
 
 BaseType_t xSchedulerMessageRequest( MessageType_t xRequestType );
+
+uint8_t ucGetNthEventBit( uint8_t ucN );
+
+uint8_t ucSetNthEventBit( uint8_t ucN );
+
+uint8_t ucClearNthEventBit( uint8_t ucN );
 
 #endif /* DEADLINE_DRIVEN_SCHEDULER_API_H_ */

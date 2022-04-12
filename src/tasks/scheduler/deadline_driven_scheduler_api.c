@@ -71,6 +71,7 @@ void vPrintDeadlineDrivenTaskInfo( DeadlineDrivenTask_t xTask )
 {
     printf( "%s\n", xTask.cName );
     printf( "ID: %d\n", ( int ) xTask.xId );
+    printf( "Task Number: %d\n", xTask.ucTaskNumber );
     printf( "Absolute Deadline: %d\n", ( int ) xTask.xAbsoluteDeadline );
     printf( "Period: %d\n", ( int ) xTask.xPeriod );
     printf( "Release Time: %d\n", ( int ) xTask.xReleaseTime );
@@ -97,14 +98,17 @@ uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
                                      TickType_t xReleaseTime
                                    )
 {
+    static uint8_t ucTaskCounter = 0;
+    ucTaskCounter++;
     /* Create FreeRTOS task */
     TaskHandle_t xFTaskHandle = NULL;
-    xTaskCreate( vTaskFunction, cName, configMINIMAL_STACK_SIZE, NULL, PRIORITY_LOW, &xFTaskHandle );
-    return ulCreateDeadlineDrivenTaskMetadata( xFTaskHandle, cName, xAbsoluteDeadline, xPeriod, xReleaseTime );
+    xTaskCreate( vTaskFunction, cName, configMINIMAL_STACK_SIZE, ( void * ) ucTaskCounter, PRIORITY_LOW, &xFTaskHandle );
+    return ulCreateDeadlineDrivenTaskMetadata( xFTaskHandle, cName, ucTaskCounter, xAbsoluteDeadline, xPeriod, xReleaseTime );
 }
 
 uint32_t ulCreateDeadlineDrivenTaskMetadata( TaskHandle_t xFTaskHandle,
                                              char cName[],
+                                             uint8_t ucTaskNumber,
                                              TickType_t xAbsoluteDeadline,
                                              TickType_t xPeriod,
                                              TickType_t xReleaseTime
@@ -115,6 +119,7 @@ uint32_t ulCreateDeadlineDrivenTaskMetadata( TaskHandle_t xFTaskHandle,
     DeadlineDrivenTask_t xNewTask =
     {
         xId: xTaskId,
+        ucTaskNumber: ucTaskNumber,
         xFTaskHandle: xFTaskHandle,
         xAbsoluteDeadline: xAbsoluteDeadline,
         xPeriod: xPeriod,
@@ -139,7 +144,7 @@ void vCompleteDeadlineDrivenTask()
 {
     TickType_t xCurrentTime = xTaskGetTickCount();
     xQueueSend( xTaskMessagesQueueHandle, &xCurrentTime, 0 );
-    xEventGroupSetBits( xCurrentTaskCompleteEventGroup, CURRENT_TASK_COMPLETE_BIT );
+    ucSetNthEventBit( CURRENT_TASK_COMPLETE_BIT );
 }
 
 BaseType_t xSchedulerMessageRequest( MessageType_t xRequestType )
@@ -147,3 +152,18 @@ BaseType_t xSchedulerMessageRequest( MessageType_t xRequestType )
     return xQueueSend(xSchedulerMessagesQueueHandle, (void *) &xRequestType, 0 );
 }
 
+uint8_t ucGetNthEventBit( uint8_t ucN )
+{
+    EventBits_t xEventBits = xEventGroupGetBits( xTaskEventGroup );
+    return ( xEventBits & ( 1 << ucN ) ) >> ucN;
+}
+
+uint8_t ucSetNthEventBit( uint8_t ucN )
+{
+    return xEventGroupSetBits( xTaskEventGroup, EVENT_BIT( ucN ) );
+}
+
+uint8_t ucClearNthEventBit( uint8_t ucN )
+{
+    return xEventGroupClearBits( xTaskEventGroup, EVENT_BIT( ucN ) );
+}

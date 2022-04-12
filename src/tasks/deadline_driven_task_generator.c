@@ -17,6 +17,7 @@ void vDeadlineDrivenTaskGenerator( void *pvParameters )
             {
                 ulCreateDeadlineDrivenTaskMetadata( xTask.xFTaskHandle,
                                                     xTask.cName,
+                                                    xTask.ucTaskNumber,
                                                     xTask.xAbsoluteDeadline +xTask.xPeriod,
                                                     xTask.xPeriod,
                                                     xTask.xReleaseTime + xTask.xPeriod

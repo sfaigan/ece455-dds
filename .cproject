@@ -114,9 +114,6 @@
 							<tool id="com.atollic.truestudio.ar.base.1731930478" name="Archiver" superClass="com.atollic.truestudio.ar.base"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="com.atollic.truestudio.exe.debug.1307762149.581000989" name="heap_4.c" rcbsApplicability="disable" resourcePath="FreeRTOS_Source/portable/MemMang/heap_4.c" toolsToInvoke="com.atollic.truestudio.exe.debug.toolchain.gcc.1332771793.523604836">
-						<tool id="com.atollic.truestudio.exe.debug.toolchain.gcc.1332771793.523604836" name="C Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gcc.1332771793"/>
-					</fileInfo>
 					<sourceEntries>
 						<entry excluding="portable/MemMang/heap_1.c|portable/MemMang/heap_5.c|portable/MemMang/heap_3.c|portable/MemMang/heap_2.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="FreeRTOS_Source"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libraries"/>
