@@ -10,7 +10,11 @@
 #include "scheduler/deadline_driven_scheduler_api.h"
 #include "../tiny_printf.h"
 
-/* Function declarations */
+/* 
+ * Deadline Driven Task Monitor
+ * Regularly requests the active, overdue, and completed task lists.
+ * Contents of each list are printed to stdout.
+ */
 void vDeadlineDrivenTaskMonitor( void *pvParameters );
 
 #endif /* TASK_MONITOR_H_ */

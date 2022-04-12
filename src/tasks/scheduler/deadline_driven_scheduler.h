@@ -13,7 +13,10 @@
 #include "deadline_driven_scheduler_api.h"
 #include "../../tiny_printf.h"
 
-/* Function declarations */
+/* 
+ * Deadline Driven Scheduler
+ * Schedules user-created tasks by earliest deadline first.
+ */
 void vDeadlineDrivenScheduler( void *pvParameters );
 
 #endif /* DEADLINE_DRIVEN_SCHEDULER_H_ */

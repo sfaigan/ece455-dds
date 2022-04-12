@@ -62,16 +62,23 @@ typedef enum SchedulerMessageType
 } MessageType_t;
 
 /* Function declarations */
+
+/* Returns a new task linked list node */
 DeadlineDrivenTaskNode_t *pxCreateTaskNode( DeadlineDrivenTask_t xTask );
 
+/* Creates a node for the provided task and appends it to the provided list */
 void vAddTaskToList( DeadlineDrivenTaskNode_t **pxTaskListHead, DeadlineDrivenTask_t xNewTask );
 
+/* Delete a task node from a list given its unique task ID */
 void vDeleteTaskFromList( DeadlineDrivenTaskNode_t **pxTaskListHead, DeadlineDrivenTaskId_t xTaskId );
 
+/* Pretty print a task's metadata */
 void vPrintDeadlineDrivenTaskInfo( DeadlineDrivenTask_t xTask );
 
+/* Pretty print all the tasks (metadata) in the provided list */
 void vPrintTaskList( DeadlineDrivenTaskNode_t *pxTaskListHead );
 
+/* Create a new deadline driven task (with an F-task) and return the unique ID */
 uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
                                      char cName[],
                                      TickType_t xAbsoluteDeadline,
@@ -79,6 +86,7 @@ uint32_t ulCreateDeadlineDrivenTask( void (*vTaskFunction)( void * ),
                                      TickType_t xReleaseTime
                                    );
 
+/* Create a DD-task to store the metadata for a deadline driven task */
 uint32_t ulCreateDeadlineDrivenTaskMetadata( TaskHandle_t xFTaskHandle,
                                              char cName[],
                                              uint8_t ucTaskNumber,
@@ -87,14 +95,15 @@ uint32_t ulCreateDeadlineDrivenTaskMetadata( TaskHandle_t xFTaskHandle,
                                              TickType_t xReleaseTime
                                            );
 
+/* Sends the completion time of the task to the scheduler and mark the task as completed */
 void vCompleteDeadlineDrivenTask();
 
+/* Request a task list (active, completed, overdue) from the scheduler */
 BaseType_t xSchedulerMessageRequest( MessageType_t xRequestType );
 
+/* Abstracted functions to access/manipulate event bits */
 uint8_t ucGetNthEventBit( uint8_t ucN );
-
 uint8_t ucSetNthEventBit( uint8_t ucN );
-
 uint8_t ucClearNthEventBit( uint8_t ucN );
 
 #endif /* DEADLINE_DRIVEN_SCHEDULER_API_H_ */

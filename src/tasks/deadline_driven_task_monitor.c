@@ -6,7 +6,8 @@ void vDeadlineDrivenTaskMonitor( void *pvParameters )
 {
     while( 1 )
 	{
-        /* Request data from scheduler */
+        /* If there are no outstanding requests
+           Request active, overdue, and completed task lists from scheduler */
         if( uxQueueMessagesWaiting( xTaskRegenerationRequestsQueueHandle ) == 0 )
         {
             if( xSchedulerMessageRequest( REQUEST_COMPLETED_LIST ) != pdPASS )

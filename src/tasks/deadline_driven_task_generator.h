@@ -9,7 +9,10 @@
 #include "scheduler/deadline_driven_scheduler_api.h"
 #include "../tiny_printf.h"
 
-/* Function declarations */
+/* 
+ * Deadline Driven Task Generator
+ * Regenerates periodic tasks upon request.
+ */
 void vDeadlineDrivenTaskGenerator( void *pvParameters );
 
 #endif /* DEADLINE_DRIVEN_TASK_GENERATOR_H_ */

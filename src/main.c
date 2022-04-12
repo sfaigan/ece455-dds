@@ -108,6 +108,7 @@ static void prvSetupHardware( void );
  *
  */
 
+/* Test task that counts to 95 ticks */
 void vTestTask1( void *pvParameters )
 {
     TickType_t xStartTime;
@@ -126,6 +127,7 @@ void vTestTask1( void *pvParameters )
     }
 }
 
+/* Test task that counts to 150 ticks */
 void vTestTask2( void *pvParameters )
 {
     uint8_t ucTaskNumber = ( uint8_t ) pvParameters;
@@ -144,6 +146,7 @@ void vTestTask2( void *pvParameters )
     }
 }
 
+/* Test task that counts to 250 ticks */
 void vTestTask3( void *pvParameters )
 {
     uint8_t ucTaskNumber = ( uint8_t ) pvParameters;
@@ -184,27 +187,31 @@ int main( void )
     vQueueAddToRegistry( xTaskRegenerationRequestsQueueHandle, "Task Regeneration Requests" );
     vQueueAddToRegistry( xSchedulerMessagesQueueHandle, "Scheduler (Monitor) Messages" );
 
-    /* Create tasks */
+    /* Create control tasks */
     xTaskCreate( vDeadlineDrivenScheduler, "DDS", configMINIMAL_STACK_SIZE, NULL, 5, NULL );
     xTaskCreate( vDeadlineDrivenTaskGenerator, "Generator", configMINIMAL_STACK_SIZE, NULL, 3, NULL );
     xTaskCreate( vDeadlineDrivenTaskMonitor, "Monitor", configMINIMAL_STACK_SIZE, NULL, 2, NULL );
 
+    /* Create event group used for keeping track of completed and overdue tasks */
     xTaskEventGroup = xEventGroupCreate();
     if( xTaskEventGroup )
     {
+        /* Start with current task complete (no task has run) */
         ucSetNthEventBit( CURRENT_TASK_COMPLETE_BIT );
     }
     else
     {
+        /* Error handling */
         printf("Failed to create event group for task completion.\n");
         return EXIT_FAILURE;
     }
 
+    /* Create tasks from test bench 2 */
     ulCreateDeadlineDrivenTask( vTestTask1, "Task 1", 250, 250, 0 );
     ulCreateDeadlineDrivenTask( vTestTask2, "Task 2", 500, 500, 0 );
     ulCreateDeadlineDrivenTask( vTestTask3, "Task 3", 750, 750, 0 );
 
-	/* Start the tasks and timer running. */
+	/* Start the FreeRTOS scheduler */
 	vTaskStartScheduler();
 
 	return EXIT_SUCCESS;

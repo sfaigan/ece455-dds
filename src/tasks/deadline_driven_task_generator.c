@@ -10,6 +10,7 @@ void vDeadlineDrivenTaskGenerator( void *pvParameters )
 
     while( 1 )
     {
+        /* For every task regeneration request (as in periodic tasks), create a new DD-task */
         ucMessagesAvailable = uxQueueMessagesWaiting( xTaskRegenerationRequestsQueueHandle );
         for( ucRequestCounter = 0; ucRequestCounter < ucMessagesAvailable; ucRequestCounter++ )
         {
