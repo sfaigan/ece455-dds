@@ -73,7 +73,7 @@ void vDeadlineDrivenScheduler( void *pvParameters )
             if( pxEarliestDeadlineTaskNode != NULL )
             {
                 xStartTime = xTaskGetTickCount();
-                printf("%s released at %d\n", pxEarliestDeadlineTaskNode->xTask.cName, (int) pxEarliestDeadlineTaskNode->xTask.xReleaseTime);
+                /* printf("%s released at %d\n", pxEarliestDeadlineTaskNode->xTask.cName, (int) pxEarliestDeadlineTaskNode->xTask.xReleaseTime); */
                 vTaskPrioritySet( pxEarliestDeadlineTaskNode->xTask.xFTaskHandle, PRIORITY_HIGH );
                 ucClearNthEventBit( CURRENT_TASK_COMPLETE_BIT );
                 pxEarliestDeadlineTaskNode->xTask.xStartTime = xStartTime;
@@ -88,13 +88,13 @@ void vDeadlineDrivenScheduler( void *pvParameters )
                 if( xQueueReceive( xTaskMessagesQueueHandle, &xCompletionTime, 0 ) )
                 {
                     pxEarliestDeadlineTaskNode->xTask.xCompletionTime = xCompletionTime;
-                    printf("%s completed at %d\n", pxEarliestDeadlineTaskNode->xTask.cName, (int) pxEarliestDeadlineTaskNode->xTask.xCompletionTime);
+                    /* printf("%s completed at %d\n", pxEarliestDeadlineTaskNode->xTask.cName, (int) pxEarliestDeadlineTaskNode->xTask.xCompletionTime); */
                     vAddTaskToList( &xCompletedTasksHead, pxEarliestDeadlineTaskNode->xTask );
                     vDeleteTaskFromList( &xActiveTasksHead, pxEarliestDeadlineTaskNode->xTask.xId );
                 }
                 else if( ( uxBits & EVENT_BIT( CURRENT_TASK_COMPLETE_BIT ) ) == 0 )
                 {
-                    printf("%s overdue at %d\n", pxEarliestDeadlineTaskNode->xTask.cName, (int) xTaskGetTickCount() );
+                    /* printf("%s overdue at %d\n", pxEarliestDeadlineTaskNode->xTask.cName, (int) xTaskGetTickCount() ); */
                     ucSetNthEventBit( pxEarliestDeadlineTaskNode->xTask.ucTaskNumber );
                     vAddTaskToList( &xOverdueTasksHead, pxEarliestDeadlineTaskNode->xTask );
                     vDeleteTaskFromList( &xActiveTasksHead, pxEarliestDeadlineTaskNode->xTask.xId );
