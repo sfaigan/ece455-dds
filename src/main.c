@@ -115,7 +115,7 @@ void vTestTask1( void *pvParameters )
     while( 1 )
     {
         xStartTime = xTaskGetTickCount();
-        while( xTaskGetTickCount() - xStartTime < 100 ) {
+        while( xTaskGetTickCount() - xStartTime < 95 ) {
             if( ucGetNthEventBit( ucTaskNumber ) )
             {
                 xStartTime = xTaskGetTickCount();
@@ -133,7 +133,7 @@ void vTestTask2( void *pvParameters )
     while( 1 )
     {
         xStartTime = xTaskGetTickCount();
-        while( xTaskGetTickCount() - xStartTime < 200 ) {
+        while( xTaskGetTickCount() - xStartTime < 150 ) {
             if( ucGetNthEventBit( ucTaskNumber ) )
             {
                 ucClearNthEventBit( ucTaskNumber );
@@ -151,7 +151,7 @@ void vTestTask3( void *pvParameters )
     while( 1 )
     {
         xStartTime = xTaskGetTickCount();
-        while( xTaskGetTickCount() - xStartTime < 200 ) {
+        while( xTaskGetTickCount() - xStartTime < 250 ) {
             if( ucGetNthEventBit( ucTaskNumber ) )
             {
                 ucClearNthEventBit( ucTaskNumber );
@@ -200,9 +200,9 @@ int main( void )
         return EXIT_FAILURE;
     }
 
-    ulCreateDeadlineDrivenTask( vTestTask1, "Task 1", 500, 500, 0 );
+    ulCreateDeadlineDrivenTask( vTestTask1, "Task 1", 250, 250, 0 );
     ulCreateDeadlineDrivenTask( vTestTask2, "Task 2", 500, 500, 0 );
-    ulCreateDeadlineDrivenTask( vTestTask3, "Task 3", 500, 500, 0 );
+    ulCreateDeadlineDrivenTask( vTestTask3, "Task 3", 750, 750, 0 );
 
 	/* Start the tasks and timer running. */
 	vTaskStartScheduler();
